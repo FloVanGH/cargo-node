@@ -128,7 +128,7 @@ fn main() {
         println!("{}", output);
     }
 
-    // Build with cargo web to generate OrbTk web application
+    // Build with cargo web to generate web application
     println!("Execute cargo-web");
     println!("-----------------\n");
     Command::new("cargo")
@@ -147,17 +147,18 @@ fn main() {
     println!("----------------------\n");
 
     let input_path = format!("target/wasm32-unknown-unknown/debug/examples/{}", bin);
-    let output_path = format!("target/orbtk/debug/examples/{}", bin);
+    let output_path = format!("target/cargo-node/debug/examples/{}", bin);
 
     // create output dir
     let _ = create_dir_all(&output_path);
 
     // copy output of cargo-web
-    println!("Copy output of cargo-web to orbtk.");
-    let _ = copy(
+    println!("Copy output of cargo-web to cargo-node.");
+    let r = copy(
         format!("{}.d", input_path),
         format!("{}/{}.d", output_path, bin),
     );
+    println!("{:?}", r);
     let _ = copy(
         format!("{}.js", input_path),
         format!("{}/{}.js", output_path, bin),
