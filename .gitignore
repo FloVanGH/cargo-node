@@ -19,3 +19,5 @@
 brain_*.rs
 
 .DS_Store
+
+package-lock.json
