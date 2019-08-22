@@ -38,7 +38,7 @@ version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "cargo-orbtk"
+name = "cargo-node"
 version = "0.1.0"
 dependencies = [
  "sigma 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",

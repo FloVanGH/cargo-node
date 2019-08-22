@@ -8,7 +8,7 @@
       "type": "lldb",
       "request": "launch",
       "name": "Widgets",
-      "program": "${workspaceFolder}/target/debug/cargo-orbtk",
+      "program": "${workspaceFolder}/target/debug/cargo-node",
       "cwd": "${workspaceFolder}/target/debug",
       "preLaunchTask": "build",
       "sourceLanguages": [

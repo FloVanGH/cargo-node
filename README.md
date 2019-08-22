@@ -1,6 +1,7 @@
-# cargo-orbtk
+# cargo-node
 
-[![Build status](https://gitlab.redox-os.org/redox-os/cargo-orbtk/badges/master/build.svg)](https://gitlab.redox-os.org/redox-os/cargo-orbtk/pipelines)
+[![Build status](https://gitlab.com/FloVanGL/cargo-node/badges/master/build.svg)](https://gitlab.com/FloVanGL/cargo-node/pipelines)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-A cargo sub command to build and run OrbTk applications as electron app.
+A cargo sub command to build, run and deploy rust wasm applications as electron app.
+

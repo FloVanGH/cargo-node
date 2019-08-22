@@ -142,8 +142,8 @@ fn main() {
         .output()
         .expect("Could not build with cargo-web.");
 
-    // cargo-orbtk build
-    println!("\nBuild with cargo-orbtk");
+    // cargo-node build
+    println!("\nBuild with cargo-node");
     println!("----------------------\n");
 
     let input_path = format!("target/wasm32-unknown-unknown/debug/examples/{}", bin);

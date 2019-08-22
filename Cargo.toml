@@ -1,5 +1,5 @@
 [package]
-name = "cargo-orbtk"
+name = "cargo-node"
 version = "0.1.0"
 authors = ["Florian Blasius <flovanpt@posteo.de>"]
 edition = "2018"
