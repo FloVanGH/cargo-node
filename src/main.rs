@@ -2,7 +2,6 @@ use sigma::Sigma;
 use std::{
   fs::{copy, create_dir_all, File},
   io::Write,
-  process::{Command, Stdio},
 };
 
 const DEFAULT_INDEX_HTML_TEMPLATE: &'static str = r#"<!DOCTYPE html>
@@ -56,7 +55,7 @@ function createWindow () {
 app.on('ready', createWindow)
 
 app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
+  app.quit()
 })
 
 app.on('activate', function () {
@@ -64,7 +63,7 @@ app.on('activate', function () {
 })"#;
 
 const PACKAGE_JS_TEMPLATE: &'static str = r#"{
-  "name": "{{ name: str }}a",
+  "name": "{{ name: str }}",
   "version": "1.0.0",
   "description": "A minimal Electron application",
   "main": "main.js",
@@ -97,6 +96,10 @@ const PRELUDE_JS_TEMPLATE: &'static str = r#"window.addEventListener('DOMContent
   }
 })"#;
 
+use self::command::Command;
+
+mod command;
+
 fn main() {
   let bin = "widgets";
 
@@ -110,16 +113,12 @@ fn main() {
     .expect("Error running cargo web.")
     == 101
   {
-    println!("Install cargo-web");
-    println!("-----------------\n");
+    println!("\ncargo install cargo-web\n");
     let output = Command::new("cargo")
       .arg("install")
       .arg("--color")
       .arg("always")
       .arg("cargo-web")
-      .stderr(Stdio::inherit())
-      .stdin(Stdio::null())
-      .stdout(Stdio::piped())
       .output()
       .expect("Could not install cargo-web");
 
@@ -129,31 +128,23 @@ fn main() {
   }
 
   // Build with cargo web to generate web application
-  println!("Execute cargo-web");
-  println!("-----------------\n");
-  Command::new("cargo")
-    .arg("web")
+  println!("\ncargo web build\n");
+  Command::new("cargo-web")
+    .current_dir("eval/")
     .arg("build")
     .arg("--example")
     .arg(bin)
-    .stderr(Stdio::inherit())
-    .stdin(Stdio::null())
-    .stdout(Stdio::piped())
     .output()
     .expect("Could not build with cargo-web.");
 
-  // cargo-node build
-  println!("\nBuild with cargo-node");
-  println!("----------------------\n");
-
-  let input_path = format!("target/wasm32-unknown-unknown/debug/examples/{}", bin);
-  let output_path = format!("target/cargo-node/debug/examples/{}", bin);
+  let input_path = format!("eval/target/wasm32-unknown-unknown/debug/examples/{}", bin);
+  let output_path = format!("eval/target/cargo-node/debug/examples/{}", bin);
 
   // create output dir
   let _ = create_dir_all(&output_path);
 
   // copy output of cargo-web
-  println!("Copy output of cargo-web to cargo-node.");
+  println!("\nCopy output of cargo-web to cargo-node.\n");
   let r = copy(
     format!("{}.d", input_path),
     format!("{}/{}.d", output_path, bin),
@@ -220,31 +211,20 @@ fn main() {
     .expect("Could not write to prelude.js");
 
   // npm install
-  println!("Execute npm install");
-  println!("-------------------\n");
+  println!("\nnpm install\n");
 
   Command::new("npm")
     .current_dir(format!("{}/", output_path))
     .arg("install")
-    .arg("--prefix")
-    .arg(format!("./{}/", output_path))
-    .arg(bin)
-    .stderr(Stdio::inherit())
-    .stdin(Stdio::null())
-    .stdout(Stdio::piped())
     .output()
     .expect("Could not run npm install.");
 
-  // npm start
+  // // npm start
   // println!("Execute npm start");
   // println!("-----------------\n");
   // Command::new("npm")
   //   .current_dir(format!("{}/", output_path))
   //   .arg("start")
-  //   .arg(bin)
-  //   .stderr(Stdio::inherit())
-  //   .stdin(Stdio::null())
-  //   .stdout(Stdio::piped())
   //   .output()
   //   .expect("Could not run npm install.");
 }

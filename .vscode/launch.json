@@ -5,15 +5,17 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "lldb",
+      "name": "Test launch",
+      "type": "node",
       "request": "launch",
-      "name": "Widgets",
-      "program": "${workspaceFolder}/target/debug/cargo-node",
-      "cwd": "${workspaceFolder}/target/debug",
+      "cwd": "${workspaceRoot}/eval/target/cargo-node/debug/examples/widgets",
+      "runtimeExecutable": "${workspaceRoot}/eval/target/cargo-node/debug/examples/widgets/node_modules/.bin/electron",
+      "windows": {
+        "runtimeExecutable": "${workspaceRoot}/eval/target/cargo-node/debug/examples/widgets/node_modules/.bin/electron.cmd"
+      },
+      "args" : ["."],
+      "outputCapture": "std",
       "preLaunchTask": "build",
-      "sourceLanguages": [
-        "rust"
-      ]
-    },
+    }
   ]
 }

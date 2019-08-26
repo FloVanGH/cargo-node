@@ -1,0 +1,49 @@
+[package]
+name = "orbtk"
+version = "0.3.0"
+authors = [
+    "Florian Blasius <flovanpt@posteo.de>",
+    "Jeremy Soller <jackpot51@gmail.com>"
+]
+description = "The Orbital Widget Toolkit"
+documentation = "https://docs.rs/orbtk"
+repository = "https://gitlab.redox-os.org/redox-os/orbtk"
+readme = "README.md"
+license = "MIT"
+keywords = [
+    "orbital",
+    "redox",
+    "ui",
+]
+edition = "2018"
+
+[lib]
+name = "orbtk"
+path = "src/lib.rs"
+
+[dependencies]
+orbtk-api = { version = "0.1.0", path = "crates/api" }
+orbtk-css-engine = { version = "0.1.0", path = "crates/css-engine" }
+orbtk-render = { version = "0.1.0", path = "crates/render" }
+orbtk-shell = { version = "0.1.0", path = "crates/shell" }
+orbtk-theme = { version = "0.1.0", path="crates/theme" }
+orbtk-utils = { version = "0.1.0", path = "crates/utils" }
+orbtk-tree = { version = "0.1.0", path="crates/tree" }
+orbtk-widgets = { version = "0.1.0", path="crates/widgets" }
+dces = { git = "https://gitlab.redox-os.org/redox-os/dces-rust.git" }
+
+[features]
+debug = ["orbtk-api/debug"]
+preview = ["orbtk-shell/preview", "orbtk-api/preview", "orbtk-render/preview"]
+
+[workspace]
+members = [
+    "crates/api",
+    "crates/css-engine",
+    "crates/render",
+    "crates/shell",
+    "crates/theme",
+    "crates/utils",
+    "crates/tree",
+    "crates/widgets",
+]
