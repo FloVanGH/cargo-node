@@ -1,12 +1,9 @@
 use std::{
-    env,
     fs::{copy, create_dir_all, File},
     io::{prelude::*, Write},
 };
 
-use serde::Deserialize;
 use sigma::Sigma;
-use toml;
 
 const DEFAULT_INDEX_HTML_TEMPLATE: &'static str = r#"<!DOCTYPE html>
 <html>
@@ -101,72 +98,13 @@ const PRELOAD_JS_TEMPLATE: &'static str = r#"window.addEventListener('DOMContent
 })"#;
 
 use self::command::Command;
+use self::config::*;
 
 mod command;
-
-#[derive(Debug, Deserialize)]
-pub struct CargoPackage {
-    name: Option<String>,
-    description: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct CargoToml {
-    package: Option<CargoPackage>,
-}
-
-#[derive(PartialEq)]
-pub enum CargoMode {
-    Bin,
-    Example(String),
-}
-
-pub struct Config {
-    cargo_mode: CargoMode,
-}
-
-impl Config {
-    pub fn new() -> Self {
-        Config {
-            cargo_mode: CargoMode::Bin,
-        }
-    }
-}
+mod config;
 
 fn main() {
     let mut config = Config::new();
-    let mut is_example = false;
-    let mut path_extension = "";
-
-    // read command line arguments
-    for argument in env::args() {
-        match argument.as_str() {
-            "--example" => {
-                is_example = true;
-            }
-            _ => {
-                if is_example {
-                    config.cargo_mode = CargoMode::Example(argument);
-                    path_extension = "/examples";
-                    is_example = false;
-                }
-            }
-        };
-    }
-    // read project toml file
-    let toml_file = File::open("Cargo.toml");
-
-    if toml_file.is_err() {
-        println!("Could not load Cargo.toml");
-        return;
-    }
-
-    let mut contents = String::new();
-    toml_file.unwrap().read_to_string(&mut contents).unwrap();
-
-    let cargo_toml: CargoToml = toml::from_str(contents.as_str()).unwrap();
-
-    let mut bin = cargo_toml.package.unwrap().name.unwrap();
 
     // Install cargo web if it is not installed.
     if !Command::new("cargo").arg("web").exists() {
@@ -189,21 +127,20 @@ fn main() {
     let mut cargo_web_command = Command::new("cargo-web").arg("build");
 
     if let CargoMode::Example(s) = config.cargo_mode {
-        bin = s.clone();
         cargo_web_command = cargo_web_command.arg("--example").arg(s);
     }
 
     // .arg("--example")
-    // .arg(bin)
+    // .arg(config.name)
     cargo_web_command
         .output()
         .expect("Could not build with cargo-web.");
 
     let input_path = format!(
         "target/wasm32-unknown-unknown/debug{}/{}",
-        path_extension, bin
+        config.path_extension, config.name
     );
-    let output_path = format!("target/cargo-node/debug{}", path_extension);
+    let output_path = format!("target/cargo-node/debug{}", config.path_extension);
 
     // create output dir
     let _ = create_dir_all(&output_path);
@@ -214,21 +151,21 @@ fn main() {
     println!("\nCopy files to cargo-node/.\n");
     let r = copy(
         format!("{}.d", input_path),
-        format!("{}/{}.d", output_path, bin),
+        format!("{}/{}.d", output_path, config.name),
     );
     println!("{:?}", r);
     let _ = copy(
         format!("{}.js", input_path),
-        format!("{}/{}.js", output_path, bin),
+        format!("{}/{}.js", output_path, config.name),
     );
     let _ = copy(
         format!("{}.wasm", input_path),
-        format!("{}/{}.wasm", output_path, bin),
+        format!("{}/{}.wasm", output_path, config.name),
     );
 
     // build electron template files
     let index_html = Sigma::new(DEFAULT_INDEX_HTML_TEMPLATE)
-        .bind("name", bin.as_str())
+        .bind("name", config.name.as_str())
         .parse()
         .expect("Could not parse index.html template.")
         .compile()
@@ -251,7 +188,7 @@ fn main() {
         .expect("Could not write to main.js");
 
     let package_js = Sigma::new(PACKAGE_JS_TEMPLATE)
-        .bind("name", bin.as_str())
+        .bind("name", config.name.as_str())
         .parse()
         .expect("Could not parse package.json template.")
         .compile()
