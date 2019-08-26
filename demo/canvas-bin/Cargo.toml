@@ -1,5 +1,5 @@
 [package]
-name = "cargo-node"
+name = "canvas-bin"
 version = "0.1.0"
 authors = ["Florian Blasius <flovanpt@posteo.de>"]
 edition = "2018"
@@ -7,6 +7,4 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sigma = "0.1.1"
-toml = "0.5"
-serde = { verison = "1.0.99", features = ["derive"] }
+stdweb = "0.4.18"

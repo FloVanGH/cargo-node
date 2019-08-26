@@ -5,15 +5,28 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Test launch",
+      "name": "canvas-bin demo",
       "type": "node",
       "request": "launch",
-      "cwd": "${workspaceRoot}/eval/target/cargo-node/debug/examples/widgets",
-      "runtimeExecutable": "${workspaceRoot}/eval/target/cargo-node/debug/examples/widgets/node_modules/.bin/electron",
+      "cwd": "${workspaceRoot}/demo/canvas-bin/target/cargo-node/debug/",
+      "runtimeExecutable": "npm",
       "windows": {
-        "runtimeExecutable": "${workspaceRoot}/eval/target/cargo-node/debug/examples/widgets/node_modules/.bin/electron.cmd"
+        "runtimeExecutable": "npm.cmd"
       },
-      "args" : ["."],
+      "args" : ["start"],
+      "outputCapture": "std",
+      "preLaunchTask": "build",
+    },
+    {
+      "name": "canvas-lib demo",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceRoot}/demo/canvas-lib/target/cargo-node/debug/examples/",
+      "runtimeExecutable": "npm",
+      "windows": {
+        "runtimeExecutable": "npm.cmd"
+      },
+      "args" : ["start"],
       "outputCapture": "std",
       "preLaunchTask": "build",
     }

@@ -25,7 +25,19 @@ impl Command {
         self
     }
 
-    pub fn output(&mut self) -> io::Result<process::Output> {
+    pub fn exists(&mut self) -> bool {
+        if let Ok(out) = self.inner_output(false) {
+            if let Some(code) = out.status.code() {
+                return code != 101;
+            }
+
+            return false;
+        }
+
+        false
+    }
+
+    fn inner_output(&mut self, out_put: bool) -> io::Result<process::Output> {
         let mut command = if cfg!(target_os = "windows") {
             process::Command::new("cmd")
         } else {
@@ -46,15 +58,21 @@ impl Command {
             command_ref
         };
 
-        command_ref = command_ref
-            .stderr(process::Stdio::inherit())
-            .stdin(process::Stdio::null())
-            .stdout(process::Stdio::piped());
+        if out_put {
+            command_ref = command_ref
+                .stderr(process::Stdio::inherit())
+                .stdin(process::Stdio::null())
+                .stdout(process::Stdio::piped());
+        }
 
         for arg in &self.args {
             command_ref = command_ref.arg(arg)
         }
 
         command_ref.output()
+    }
+
+    pub fn output(&mut self) -> io::Result<process::Output> {
+        self.inner_output(true)
     }
 }
