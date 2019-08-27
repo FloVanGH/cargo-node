@@ -104,120 +104,120 @@ mod command;
 mod config;
 
 fn main() {
-    let config = Config::new();
+    // let config = Config::new();
 
-    // Install cargo web if it is not installed.
-    if !Command::new("cargo").arg("web").exists() {
-        println!("\ncargo install cargo-web\n");
-        let output = Command::new("cargo")
-            .arg("install")
-            .arg("--color")
-            .arg("always")
-            .arg("cargo-web")
-            .output()
-            .expect("Could not install cargo-web");
+    // // Install cargo web if it is not installed.
+    // if !Command::new("cargo").arg("web").exists() {
+    //     println!("\ncargo install cargo-web\n");
+    //     let output = Command::new("cargo")
+    //         .arg("install")
+    //         .arg("--color")
+    //         .arg("always")
+    //         .arg("cargo-web")
+    //         .output()
+    //         .expect("Could not install cargo-web");
 
-        let output = String::from_utf8_lossy(&output.stdout).into_owned();
+    //     let output = String::from_utf8_lossy(&output.stdout).into_owned();
 
-        println!("{}", output);
-    }
+    //     println!("{}", output);
+    // }
 
-    // Build with cargo web to generate web application
-    println!("\ncargo web build\n");
-    let mut cargo_web_command = Command::new("cargo-web").arg("build");
+    // // Build with cargo web to generate web application
+    // println!("\ncargo web build\n");
+    // let mut cargo_web_command = Command::new("cargo-web").arg("build");
 
-    if let CargoMode::Example(s) = config.cargo_mode {
-        cargo_web_command = cargo_web_command.arg("--example").arg(s);
-    }
+    // if let CargoBuildFlag::Example(s) = config.cargo_build_flag {
+    //     cargo_web_command = cargo_web_command.arg("--example").arg(s);
+    // }
 
-    // .arg("--example")
-    // .arg(config.name)
-    cargo_web_command
-        .output()
-        .expect("Could not build with cargo-web.");
+    // // .arg("--example")
+    // // .arg(config.name)
+    // cargo_web_command
+    //     .output()
+    //     .expect("Could not build with cargo-web.");
 
-    let input_path = format!(
-        "target/wasm32-unknown-unknown/debug{}/{}",
-        config.path_extension, config.name
-    );
-    let output_path = format!("target/cargo-node/debug{}", config.path_extension);
+    // let input_path = format!(
+    //     "target/wasm32-unknown-unknown/debug{}/{}",
+    //     config.path_extension, config.name
+    // );
+    // let output_path = format!("target/cargo-node/debug{}", config.path_extension);
 
-    // create output dir
-    let _ = create_dir_all(&output_path);
+    // // create output dir
+    // let _ = create_dir_all(&output_path);
 
-    println!("{}.d", input_path);
+    // println!("{}.d", input_path);
 
-    // copy output of cargo-web
-    println!("\nCopy files to cargo-node/.\n");
-    let r = copy(
-        format!("{}.d", input_path),
-        format!("{}/{}.d", output_path, config.name),
-    );
-    println!("{:?}", r);
-    let _ = copy(
-        format!("{}.js", input_path),
-        format!("{}/{}.js", output_path, config.name),
-    );
-    let _ = copy(
-        format!("{}.wasm", input_path),
-        format!("{}/{}.wasm", output_path, config.name),
-    );
+    // // copy output of cargo-web
+    // println!("\nCopy files to cargo-node/.\n");
+    // let r = copy(
+    //     format!("{}.d", input_path),
+    //     format!("{}/{}.d", output_path, config.name),
+    // );
+    // println!("{:?}", r);
+    // let _ = copy(
+    //     format!("{}.js", input_path),
+    //     format!("{}/{}.js", output_path, config.name),
+    // );
+    // let _ = copy(
+    //     format!("{}.wasm", input_path),
+    //     format!("{}/{}.wasm", output_path, config.name),
+    // );
 
-    // build electron template files
-    let index_html = Sigma::new(DEFAULT_INDEX_HTML_TEMPLATE)
-        .bind("name", config.name.as_str())
-        .parse()
-        .expect("Could not parse index.html template.")
-        .compile()
-        .expect("Could not compile index.hml template.");
+    // // build electron template files
+    // let index_html = Sigma::new(DEFAULT_INDEX_HTML_TEMPLATE)
+    //     .bind("name", config.name.as_str())
+    //     .parse()
+    //     .expect("Could not parse index.html template.")
+    //     .compile()
+    //     .expect("Could not compile index.hml template.");
 
-    let mut file = File::create(format!("{}/index.html", output_path))
-        .expect("Could not create index.html file.");
-    file.write_all(index_html.as_bytes())
-        .expect("Could not write to index.html");
+    // let mut file = File::create(format!("{}/index.html", output_path))
+    //     .expect("Could not create index.html file.");
+    // file.write_all(index_html.as_bytes())
+    //     .expect("Could not write to index.html");
 
-    let main_js = Sigma::new(MAIN_JS_TEMPLATE)
-        .parse()
-        .expect("Could not parse main.js template.")
-        .compile()
-        .expect("Could not compile main.js template.");
+    // let main_js = Sigma::new(MAIN_JS_TEMPLATE)
+    //     .parse()
+    //     .expect("Could not parse main.js template.")
+    //     .compile()
+    //     .expect("Could not compile main.js template.");
 
-    let mut file =
-        File::create(format!("{}/main.js", output_path)).expect("Could not create main.js file.");
-    file.write_all(main_js.as_bytes())
-        .expect("Could not write to main.js");
+    // let mut file =
+    //     File::create(format!("{}/main.js", output_path)).expect("Could not create main.js file.");
+    // file.write_all(main_js.as_bytes())
+    //     .expect("Could not write to main.js");
 
-    let package_js = Sigma::new(PACKAGE_JS_TEMPLATE)
-        .bind("name", config.name.as_str())
-        .parse()
-        .expect("Could not parse package.json template.")
-        .compile()
-        .expect("Could not compile package.json template.");
+    // let package_js = Sigma::new(PACKAGE_JS_TEMPLATE)
+    //     .bind("name", config.name.as_str())
+    //     .parse()
+    //     .expect("Could not parse package.json template.")
+    //     .compile()
+    //     .expect("Could not compile package.json template.");
 
-    let mut file = File::create(format!("{}/package.json", output_path))
-        .expect("Could not create package.json file.");
-    file.write_all(package_js.as_bytes())
-        .expect("Could not write to package.json");
+    // let mut file = File::create(format!("{}/package.json", output_path))
+    //     .expect("Could not create package.json file.");
+    // file.write_all(package_js.as_bytes())
+    //     .expect("Could not write to package.json");
 
-    let preload_js = Sigma::new(PRELOAD_JS_TEMPLATE)
-        .parse()
-        .expect("Could not parse preload.js template.")
-        .compile()
-        .expect("Could not compile preload.js template.");
+    // let preload_js = Sigma::new(PRELOAD_JS_TEMPLATE)
+    //     .parse()
+    //     .expect("Could not parse preload.js template.")
+    //     .compile()
+    //     .expect("Could not compile preload.js template.");
 
-    let mut file = File::create(format!("{}/preload.js", output_path))
-        .expect("Could not create preload.js file.");
-    file.write_all(preload_js.as_bytes())
-        .expect("Could not write to preload.js");
+    // let mut file = File::create(format!("{}/preload.js", output_path))
+    //     .expect("Could not create preload.js file.");
+    // file.write_all(preload_js.as_bytes())
+    //     .expect("Could not write to preload.js");
 
-    // npm install
-    println!("\nnpm install\n");
+    // // npm install
+    // println!("\nnpm install\n");
 
-    Command::new("npm")
-        .current_dir(format!("{}/", output_path))
-        .arg("install")
-        .output()
-        .expect("Could not run npm install.");
+    // Command::new("npm")
+    //     .current_dir(format!("{}/", output_path))
+    //     .arg("install")
+    //     .output()
+    //     .expect("Could not run npm install.");
 
     // // npm start
     // println!("Execute npm start");
