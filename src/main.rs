@@ -104,7 +104,7 @@ mod command;
 mod config;
 
 fn main() {
-    let mut config = Config::new();
+    let config = Config::new();
 
     // Install cargo web if it is not installed.
     if !Command::new("cargo").arg("web").exists() {
@@ -228,3 +228,12 @@ fn main() {
     //   .output()
     //   .expect("Could not run npm install.");
 }
+
+// cargo node build --target electron --example test
+// cargo node build --target browser --example test
+// cargo node build --target android --example test
+
+// cargo node run --target android --example test
+
+// later
+// cargo node deploy --target electron

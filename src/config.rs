@@ -14,13 +14,94 @@ pub struct CargoToml {
     package: Option<CargoPackage>,
 }
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum CargoMode {
     Bin,
     Example(String),
 }
 
+#[derive(Debug, PartialEq)]
+pub enum Mode {
+    Build,
+    Run,
+    // Deploy
+}
+
+impl Default for Mode {
+    fn default() -> Self {
+        Mode::Build
+    }
+}
+
+impl From<&str> for Mode {
+    fn from(s: &str) -> Self {
+        match s {
+            "build" => {
+                Mode::Build
+            },
+            "run" => {
+                Mode::Run
+            },
+            _ => {
+                panic!("Unknown mode: {}", s);
+            }
+        }
+    }
+}
+
+impl From<String> for Mode {
+    fn from(s: String) -> Self {
+        Mode::from(s.as_str())
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Target {
+    Electron,
+    Browser,
+    Android,
+    IOS,
+}
+
+impl Default for Target {
+    fn default() -> Self {
+        Target::Electron
+    }
+}
+
+impl From<&str> for Target {
+    fn from(s: &str) -> Self {
+        match s {
+            "electron" => {
+                Target::Electron
+            },
+            "browser" => {
+                Target::Browser
+            },
+            "android" => {
+                Target::Android
+            },
+            "ios" => {
+                Target::IOS
+            }
+            _ => {
+                panic!("Unknown target: {}", s);
+            }
+        }
+    }
+}
+
+impl From<String> for Target {
+    fn from(s: String) -> Self {
+        Target::from(s.as_str())
+    }
+}
+
+#[derive(Debug)]
 pub struct Config {
+    pub mode: Mode,
+    pub target: Target,
+
     pub cargo_mode: CargoMode,
     pub path_extension: String,
     pub name: String,
@@ -67,6 +148,8 @@ impl Config {
             cargo_mode,
             path_extension: path_extension.to_string(),
             name,
+            mode: Mode::Build,
+            target: Target::Electron
         }
     }
 }
