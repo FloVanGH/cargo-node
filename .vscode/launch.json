@@ -5,7 +5,23 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "lldb",
+      "request": "launch",
       "name": "canvas-bin demo",
+      "program": "${workspaceFolder}/target/debug/cargo-node",
+      "cwd": "${workspaceFolder}/demo/canvas-bin",
+      "args": [
+        "build",
+        "--target",
+        "electron",
+      ],
+      "preLaunchTask": "build",
+      "sourceLanguages": [
+        "rust"
+      ]
+    },
+    {
+      "name": "canvas-bin demo node",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceRoot}/demo/canvas-bin/target/cargo-node/debug/",
@@ -13,12 +29,14 @@
       "windows": {
         "runtimeExecutable": "npm.cmd"
       },
-      "args" : ["start"],
+      "args": [
+        "start"
+      ],
       "outputCapture": "std",
       "preLaunchTask": "build",
     },
     {
-      "name": "canvas-lib demo",
+      "name": "canvas-lib demo node",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceRoot}/demo/canvas-lib/target/cargo-node/debug/examples/",
@@ -26,7 +44,9 @@
       "windows": {
         "runtimeExecutable": "npm.cmd"
       },
-      "args" : ["start"],
+      "args": [
+        "start"
+      ],
       "outputCapture": "std",
       "preLaunchTask": "build",
     }

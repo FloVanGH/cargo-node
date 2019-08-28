@@ -8,7 +8,7 @@
       "command": "cargo",
       "type": "shell",
       "args": [
-        "run"
+        "build"
       ],
       "presentation": {
         "reveal": "always",

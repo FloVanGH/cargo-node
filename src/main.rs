@@ -1,7 +1,10 @@
 use std::{
+    env,
     fs::{copy, create_dir_all, File},
     io::{prelude::*, Write},
 };
+
+use toml;
 
 use sigma::Sigma;
 
@@ -96,14 +99,34 @@ const PRELOAD_JS_TEMPLATE: &'static str = r#"window.addEventListener('DOMContent
     replaceText(`${type}-version`, process.versions[type])
   }
 })"#;
-
+use self::cargo_toml::*;
 use self::command::Command;
 use self::config::*;
 
+mod cargo_toml;
 mod command;
 mod config;
 
 fn main() {
+    // Build config file
+    let mut args: Vec<String> = env::args().collect();
+    args.remove(0);
+    let config = Config::from(args.clone());
+
+    // Read Cargo.toml
+    let toml_file = File::open("Cargo.toml");
+
+    if toml_file.is_err() {
+        panic!("Could not load Cargo.toml.");
+    }
+
+    let mut contents = String::new();
+    toml_file.unwrap().read_to_string(&mut contents).unwrap();
+
+    let cargo_toml: CargoToml = toml::from_str(contents.as_str()).unwrap();
+
+    // Read Node.toml
+    
     // let config = Config::new();
 
     // // Install cargo web if it is not installed.
