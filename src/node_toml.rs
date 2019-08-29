@@ -1,12 +1,13 @@
 use serde::Deserialize;
-#[derive(Debug, Deserialize)]
+#[derive(Default, Debug, Deserialize)]
 pub struct Window {
-    width: f64,
-    height: f64
+    pub name: Option<String>,
+    pub width: f64,
+    pub height: f64
 }
 
 /// Package definition inside of a Node.toml file.
-#[derive(Debug, Deserialize)]
+#[derive(Default, Debug, Deserialize)]
 pub struct NodeToml {
-    windows: Vec<Window>
+    pub windows: Option<Vec<Window>>
 }

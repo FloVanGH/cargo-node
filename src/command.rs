@@ -25,18 +25,6 @@ impl Command {
         self
     }
 
-    pub fn exists(&mut self) -> bool {
-        if let Ok(out) = self.inner_output(false) {
-            if let Some(code) = out.status.code() {
-                return code != 101;
-            }
-
-            return false;
-        }
-
-        false
-    }
-
     fn inner_output(&mut self, out_put: bool) -> io::Result<process::Output> {
         let mut command = if cfg!(target_os = "windows") {
             process::Command::new("cmd")

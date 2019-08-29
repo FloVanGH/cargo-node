@@ -7,13 +7,79 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "canvas-bin demo",
+      "name": "build canvas-bin demo browser",
+      "program": "${workspaceFolder}/target/debug/cargo-node",
+      "cwd": "${workspaceFolder}/demo/canvas-bin",
+      "args": [
+        "build",
+        "--target",
+        "browser",
+      ],
+      "preLaunchTask": "build",
+      "sourceLanguages": [
+        "rust"
+      ]
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "run canvas-bin demo browser",
+      "program": "${workspaceFolder}/target/debug/cargo-node",
+      "cwd": "${workspaceFolder}/demo/canvas-bin",
+      "args": [
+        "run",
+        "--target",
+        "browser",
+      ],
+      "preLaunchTask": "build",
+      "sourceLanguages": [
+        "rust"
+      ]
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "build canvas-bin demo electorn",
       "program": "${workspaceFolder}/target/debug/cargo-node",
       "cwd": "${workspaceFolder}/demo/canvas-bin",
       "args": [
         "build",
         "--target",
         "electron",
+      ],
+      "preLaunchTask": "build",
+      "sourceLanguages": [
+        "rust"
+      ]
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "run canvas-bin demo electron",
+      "program": "${workspaceFolder}/target/debug/cargo-node",
+      "cwd": "${workspaceFolder}/demo/canvas-bin",
+      "args": [
+        "run",
+        "--target",
+        "electron",
+      ],
+      "preLaunchTask": "build",
+      "sourceLanguages": [
+        "rust"
+      ]
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "canvas-lib demo",
+      "program": "${workspaceFolder}/target/debug/cargo-node",
+      "cwd": "${workspaceFolder}/demo/canvas-lib",
+      "args": [
+        "build",
+        "--target",
+        "electron",
+        "--example",
+        "canvas"
       ],
       "preLaunchTask": "build",
       "sourceLanguages": [

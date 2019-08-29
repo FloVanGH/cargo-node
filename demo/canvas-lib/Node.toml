@@ -1,3 +1,4 @@
 [[windows]]
+name = "canvas"
 width = 300
 height = 100
