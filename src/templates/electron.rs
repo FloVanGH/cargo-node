@@ -52,7 +52,8 @@ pub const PACKAGE_JSON_TEMPLATE: &'static str = r#"{
   }
 }"#;
 
-pub const PRELOAD_JS_TEMPLATE: &'static str = r#"window.addEventListener('DOMContentLoaded', () => {
+pub const PRELOAD_JS_TEMPLATE: &'static str =
+    r#"window.addEventListener('DOMContentLoaded', () => {
   const replaceText = (selector, text) => {
     const element = document.getElementById(selector)
     if (element) element.innerText = text

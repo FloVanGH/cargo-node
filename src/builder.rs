@@ -30,7 +30,7 @@ impl Builder {
         // build with cargo web
         let mut cargo_web_command = Command::new("cargo-web").arg("build");
         let mut path_extension = "";
-        let mut bin_name = if let Some(package) = &cargo_toml.package {
+        let mut app_name = if let Some(package) = &cargo_toml.package {
             if let Some(name) = &package.name {
                 name.clone()
             } else {
@@ -43,12 +43,12 @@ impl Builder {
         match &config.package {
             Package::Bin(bin) => {
                 cargo_web_command = cargo_web_command.arg("--bin").arg(bin.clone());
-                bin_name = bin.into();
+                app_name = bin.into();
                 path_extension = "/bins";
             }
             Package::Example(bin) => {
                 cargo_web_command = cargo_web_command.arg("--example").arg(bin.clone());
-                bin_name = bin.into();
+                app_name = bin.into();
                 path_extension = "/examples";
             }
             _ => {}
@@ -67,26 +67,26 @@ impl Builder {
         println!("\ncopy files to cargo-node/.\n");
 
         fs::copy(
-            format!("{}/{}.d", cargo_web_output_dir, bin_name),
-            format!("{}/{}.d", cargo_node_output_dir, bin_name),
+            format!("{}/{}.d", cargo_web_output_dir, app_name),
+            format!("{}/{}.d", cargo_node_output_dir, app_name),
         )
         .unwrap();
 
         fs::copy(
-            format!("{}/{}.js", cargo_web_output_dir, bin_name),
-            format!("{}/{}.js", cargo_node_output_dir, bin_name),
+            format!("{}/{}.js", cargo_web_output_dir, app_name),
+            format!("{}/{}.js", cargo_node_output_dir, app_name),
         )
         .unwrap();
         fs::copy(
-            format!("{}/{}.wasm", cargo_web_output_dir, bin_name),
-            format!("{}/{}.wasm", cargo_node_output_dir, bin_name),
+            format!("{}/{}.wasm", cargo_web_output_dir, app_name),
+            format!("{}/{}.wasm", cargo_node_output_dir, app_name),
         )
         .unwrap();
 
         // build templates
         println!("\ncreate templates");
         let index_html = Sigma::new(DEFAULT_INDEX_HTML_TEMPLATE)
-            .bind("name", bin_name.as_str())
+            .bind("name", app_name.as_str())
             .parse()
             .expect("Could not parse index.html template.")
             .compile()
@@ -104,7 +104,7 @@ impl Builder {
                     } else {
                         let window = windows
                             .iter()
-                            .filter(|w| w.name.as_ref().unwrap() == bin_name.as_str())
+                            .filter(|w| w.name.as_ref().unwrap() == app_name.as_str())
                             .next();
 
                         if let Some(window) = window {
@@ -132,7 +132,7 @@ impl Builder {
             self.save_template(main_js, format!("{}/main.js", cargo_node_output_dir));
 
             let package_json = Sigma::new(PACKAGE_JSON_TEMPLATE)
-                .bind("name", bin_name.as_str())
+                .bind("name", app_name.as_str())
                 .parse()
                 .expect("Could not parse package.json template.")
                 .compile()

@@ -5,7 +5,10 @@ pub enum Mode {
     Build,
     /// Compiles and run the current package.
     Run,
-    // todo: Deploy
+    /// Remove all files.
+    Clear,
+    /// Deploy the project.
+    Deploy,
 }
 
 impl Default for Mode {
@@ -19,6 +22,8 @@ impl From<&str> for Mode {
         match s {
             "build" => Mode::Build,
             "run" => Mode::Run,
+            "clear" => Mode::Clear,
+            "deploy" => Mode::Deploy,
             _ => {
                 panic!("Unknown mode: {}", s);
             }
@@ -39,6 +44,8 @@ pub enum Target {
     Browser,
     Android,
     IOS,
+    /// Used only by clear mode.
+    None,
 }
 
 impl Default for Target {
@@ -72,11 +79,12 @@ impl From<String> for Target {
 pub enum Package {
     /// Use the given bin package.
     Bin(String),
-
     /// Use the given example package.
     Example(String),
     /// Use the scope package.
     Scope,
+    /// Used only by clear mode.
+    None,
 }
 
 impl Default for Package {
@@ -122,6 +130,11 @@ impl From<Vec<String>> for Config {
             // mode must be the first argument
             if mode.is_none() {
                 mode = Some(Mode::from(arg));
+                if *mode.as_ref().unwrap() == Mode::Clear {
+                    target = Some(Target::None);
+                    package = Some(Package::None);
+                    break;
+                }
                 continue;
             }
 
@@ -151,7 +164,7 @@ impl From<Vec<String>> for Config {
         }
 
         if mode.is_none() {
-            panic!("No mode (build|run) is given.")
+            panic!("No mode (build|run|clear) is given.")
         }
 
         if target.is_none() {
@@ -239,6 +252,22 @@ mod tests {
 
         let config = Config::from(args);
         assert_eq!(config.mode, Mode::Run);
+        assert_eq!(config.target, Target::Electron);
+        assert_eq!(config.package, Package::Scope);
+
+        let args: Vec<String> = vec!["clear"].iter().map(|a| a.to_string()).collect();
+        let config = Config::from(args);
+        assert_eq!(config.mode, Mode::Clear);
+        assert_eq!(config.target, Target::None);
+        assert_eq!(config.package, Package::None);
+
+        let args: Vec<String> = vec!["deploy", "--target", "electron"]
+            .iter()
+            .map(|a| a.to_string())
+            .collect();
+
+        let config = Config::from(args);
+        assert_eq!(config.mode, Mode::Deploy);
         assert_eq!(config.target, Target::Electron);
         assert_eq!(config.package, Package::Scope);
     }

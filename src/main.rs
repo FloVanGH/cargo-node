@@ -1,4 +1,8 @@
-use std::{env, fs::File, io::prelude::*};
+use std::{
+    env,
+    fs::{self, File},
+    io::prelude::*,
+};
 
 use toml;
 
@@ -6,6 +10,7 @@ use self::builder::*;
 use self::cargo_toml::*;
 use self::checker::*;
 use self::config::*;
+use self::deployer::*;
 use self::node_toml::*;
 use self::runner::*;
 
@@ -14,44 +19,54 @@ mod cargo_toml;
 mod checker;
 mod command;
 mod config;
+mod deployer;
 mod node_toml;
 mod runner;
 mod templates;
 
 fn main() {
-  // Build config file
-  let mut args: Vec<String> = env::args().collect();
-  args.remove(0);
-  let config = Config::from(args.clone());
+    // Build config file
+    let mut args: Vec<String> = env::args().collect();
+    args.remove(0);
+    let config = Config::from(args.clone());
 
-  // Check prerequisites
-  Checker::new().run(&config);
+    // Clears the output.
+    if config.mode == Mode::Clear {
+        fs::remove_dir_all("target/cargo-node/").unwrap();
+        return;
+    }
 
-  // Read Cargo.toml
-  let mut input = String::new();
+    // Check prerequisites
+    Checker::new().run(&config);
 
-  File::open("Cargo.toml")
-    .and_then(|mut f| f.read_to_string(&mut input))
-    .unwrap();
+    // Read Cargo.toml
+    let mut input = String::new();
 
-  let cargo_toml: CargoToml = toml::from_str(input.as_str()).unwrap();
+    File::open("Cargo.toml")
+        .and_then(|mut f| f.read_to_string(&mut input))
+        .unwrap();
 
-  // Read Node.toml (Node.toml is optional)
-  let mut node_toml: Option<NodeToml> = None;
-  if let Ok(toml_file) = &mut File::open("Node.toml") {
-    let mut contents = String::new();
-    toml_file.read_to_string(&mut contents).unwrap();
+    let cargo_toml: CargoToml = toml::from_str(input.as_str()).unwrap();
 
-    node_toml = Some(toml::from_str(contents.as_str()).unwrap());
-  }
+    // Read Node.toml (Node.toml is optional)
+    let mut node_toml: Option<NodeToml> = None;
+    if let Ok(toml_file) = &mut File::open("Node.toml") {
+        let mut contents = String::new();
+        toml_file.read_to_string(&mut contents).unwrap();
 
-  // run builder
-  let output_dir = Builder::new().run(&config, &cargo_toml, &node_toml);
+        node_toml = Some(toml::from_str(contents.as_str()).unwrap());
+    }
 
-  // todo clear 
-  // todo cordova template build and run
+    // run builder
+    let output_dir = Builder::new().run(&config, &cargo_toml, &node_toml);
 
-  if config.mode == Mode::Run {
-    Runner::new().run(&config, output_dir.as_str());
-  }
+    match config.mode {
+        Mode::Run => {
+            Runner::new().run(&config, output_dir.as_str());
+        }
+        Mode::Deploy => {
+            Deployer::new().run(&config, &cargo_toml, &node_toml);
+        }
+        _ => {}
+    }
 }

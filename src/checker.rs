@@ -15,6 +15,7 @@ impl Checker {
     pub fn run(&self, config: &Config) {
         // check and install if needed cargo-web
         if !self.is_program_in_path("cargo-web") {
+            println!("\ninstall cargo-web");
             let output = Command::new("cargo")
                 .arg("install")
                 .arg("--color")
@@ -29,20 +30,34 @@ impl Checker {
         match config.target {
             Target::Electron => {
                 self.check_npm();
-            }
+
+                if config.mode == Mode::Deploy && !self.is_program_in_path("electron-packager") {
+                    println!("\ninstall electron-packager");
+                    let output = Command::new("npm")
+                        .arg("install")
+                        .arg("-g")
+                        .arg("electron-packager")
+                        .output()
+                        .expect("Could not install electron-packager.");
+
+                    println!("{}", String::from_utf8_lossy(&output.stdout).into_owned());
+                }
+            },
             // check and install if needed cordova
             Target::Android | Target::IOS => {
                 if !self.is_program_in_path("cordova") {
+                    println!("\ninstall cordova");
                     self.check_npm();
                     let output = Command::new("npm")
                         .arg("install")
+                        .arg("-g")
                         .arg("cordova")
                         .output()
                         .expect("Could not install cordova.");
 
                     println!("{}", String::from_utf8_lossy(&output.stdout).into_owned());
                 }
-            }
+            },
             _ => {}
         }
     }
