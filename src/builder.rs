@@ -6,18 +6,18 @@ use std::{fs, io::Write};
 /// Builds the project with the given settings.
 pub struct Builder;
 
+pub fn save_template(template: String, path: String) {
+    println!("\t{}", path);
+    let mut file =
+        fs::File::create(path.clone()).expect(format!("Could not create {} file.", path).as_str());
+    file.write_all(template.as_bytes())
+        .expect(format!("Could not write to {}", path).as_str());
+}
+
 impl Builder {
     /// Creates a new builder.
     pub fn new() -> Self {
         Builder
-    }
-
-    fn save_template(&self, template: String, path: String) {
-        println!("\t{}", path);
-        let mut file = fs::File::create(path.clone())
-            .expect(format!("Could not create {} file.", path).as_str());
-        file.write_all(template.as_bytes())
-            .expect(format!("Could not write to {}", path).as_str());
     }
 
     /// Runs the build process. Returns the output director.
@@ -59,8 +59,13 @@ impl Builder {
             .output()
             .expect("Could not build with cargo-web.");
 
-        // copy all cargo-web output files to cargo-node output dir
         let cargo_web_output_dir = format!("target/wasm32-unknown-unknown/debug{}", path_extension);
+
+        if config.target == Target::Browser {
+            return cargo_web_output_dir;
+        }
+
+        // copy all cargo-web output files to cargo-node output dir
         let cargo_node_output_dir = format!("target/cargo-node{}", path_extension);
         fs::create_dir_all(cargo_node_output_dir.clone()).unwrap();
 
@@ -100,7 +105,7 @@ impl Builder {
                     .compile()
                     .expect("Could not compile index.hml template.");
 
-                self.save_template(index_html, format!("{}/index.html", cargo_node_output_dir));
+                save_template(index_html, format!("{}/index.html", cargo_node_output_dir));
                 let (width, height) = self.get_window_size(node_toml, app_name.as_str());
                 // todo load width height from node toml
                 let main_js = Sigma::new(MAIN_JS_TEMPLATE)
@@ -111,16 +116,16 @@ impl Builder {
                     .compile()
                     .expect("Could not compile main.js template.");
 
-                self.save_template(main_js, format!("{}/main.js", cargo_node_output_dir));
+                save_template(main_js, format!("{}/main.js", cargo_node_output_dir));
 
                 let package_json = Sigma::new(PACKAGE_JSON_TEMPLATE)
                     .bind("name", app_name.as_str())
-                    .parse()
+                    .parse() 
                     .expect("Could not parse package.json template.")
                     .compile()
                     .expect("Could not compile package.json template.");
 
-                self.save_template(
+                save_template(
                     package_json,
                     format!("{}/package.json", cargo_node_output_dir),
                 );
@@ -131,20 +136,10 @@ impl Builder {
                     .compile()
                     .expect("Could not compile preload.js template.");
 
-                self.save_template(
+                save_template(
                     package_json,
                     format!("{}/preload.js", cargo_node_output_dir),
                 );
-            }
-            Target::Browser => {
-                let index_html = Sigma::new(BROWSER_INDEX_HTML_TEMPLATE)
-                    .bind("name", app_name.as_str())
-                    .parse()
-                    .expect("Could not parse index.html template.")
-                    .compile()
-                    .expect("Could not compile index.hml template.");
-
-                self.save_template(index_html, format!("{}/index.html", cargo_node_output_dir));
             }
             Target::Android => {
                 // todo
@@ -153,7 +148,8 @@ impl Builder {
         }
 
         // npm install
-        if config.target == Target::Electron {
+        if config.target == Target::Electron
+        {
             println!("\nnpm install.");
 
             Command::new("npm")

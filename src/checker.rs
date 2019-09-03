@@ -28,7 +28,7 @@ impl Checker {
         }
 
         match config.target {
-            Target::Electron => {
+             Target::Electron => {
                 self.check_npm();
 
                 if config.mode == Mode::Deploy && !self.is_program_in_path("electron-packager") {
@@ -48,7 +48,7 @@ impl Checker {
                 self.install_wasm_2_js();
             },
             // check and install if needed cordova
-            Target::Android | Target::IOS => {
+            Target::Android => {
                 if !self.is_program_in_path("cordova") {
                     println!("\ninstall cordova");
                     self.check_npm();

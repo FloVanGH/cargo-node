@@ -65,7 +65,7 @@ fn main() {
             Runner::new().run(&config, output_dir.as_str());
         }
         Mode::Deploy => {
-            Deployer::new().run(&config, &cargo_toml, &node_toml);
+            Deployer::new().run(&config, &cargo_toml, output_dir.as_str());
         }
         _ => {}
     }

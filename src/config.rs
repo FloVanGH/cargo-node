@@ -37,13 +37,13 @@ impl From<String> for Mode {
     }
 }
 
-/// Describes the target platform (electron|browser|android|ios).
+/// Describes the target platform (electron|browser|android).
 #[derive(Debug, PartialEq)]
 pub enum Target {
     Electron,
     Browser,
     Android,
-    IOS,
+    // IOS,
     /// Used only by clear mode.
     None,
 }
@@ -60,7 +60,7 @@ impl From<&str> for Target {
             "electron" => Target::Electron,
             "browser" => Target::Browser,
             "android" => Target::Android,
-            "ios" => Target::IOS,
+            // "ios" => Target::IOS,
             _ => {
                 panic!("Unknown target: {}", s);
             }
@@ -121,7 +121,7 @@ pub struct Config {
 impl From<Vec<String>> for Config {
     fn from(args: Vec<String>) -> Self {
         let mut mode = None;
-        let mut target = None;
+        let mut target = Target::Electron;
         let mut package = None;
         let mut found_target = false;
         let mut package_arg = String::default();
@@ -131,7 +131,7 @@ impl From<Vec<String>> for Config {
             if mode.is_none() {
                 mode = Some(Mode::from(arg));
                 if *mode.as_ref().unwrap() == Mode::Clear {
-                    target = Some(Target::None);
+                    target = Target::None;
                     package = Some(Package::None);
                     break;
                 }
@@ -154,8 +154,8 @@ impl From<Vec<String>> for Config {
                 _ => {}
             }
 
-            if found_target && target.is_none() {
-                target = Some(Target::from(arg.clone()));
+            if found_target {
+                target = Target::from(arg.clone());
             }
 
             if !package_arg.is_empty() && package.is_none() {
@@ -167,10 +167,6 @@ impl From<Vec<String>> for Config {
             panic!("No mode (build|run|clear) is given.")
         }
 
-        if target.is_none() {
-            panic!("No target (electron|browser|android is given.");
-        }
-
         if package.is_none() {
             package = Some(Package::default());
         }
@@ -178,7 +174,7 @@ impl From<Vec<String>> for Config {
         // unwrap because if not set the application panics before.
         Config {
             mode: mode.unwrap(),
-            target: target.unwrap(),
+            target: target,
             package: package.unwrap(),
         }
     }
@@ -217,13 +213,13 @@ mod tests {
         assert_eq!(config.target, Target::Android);
         assert_eq!(config.package, Package::Bin("test".to_string()));
 
-        let args: Vec<String> = vec!["build", "--target", "ios", "--bin", "test"]
+        let args: Vec<String> = vec!["build", "--target", "electron", "--bin", "test"]
             .iter()
             .map(|a| a.to_string())
             .collect();
         let config = Config::from(args);
         assert_eq!(config.mode, Mode::Build);
-        assert_eq!(config.target, Target::IOS);
+        assert_eq!(config.target, Target::Electron);
         assert_eq!(config.package, Package::Bin("test".to_string()));
 
         let args: Vec<String> = vec!["build", "--target", "electron", "--example", "test"]

@@ -32,6 +32,7 @@ pub const BROWSER_INDEX_HTML_TEMPLATE: &'static str = r#"<!DOCTYPE html>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1" name="viewport" />
     <script>
+        var module = {};
         var Module = {};
         var __cargo_web = {};
         Object.defineProperty( Module, 'canvas', {
@@ -48,7 +49,7 @@ pub const BROWSER_INDEX_HTML_TEMPLATE: &'static str = r#"<!DOCTYPE html>
     </script>
 </head>
 <body>
-    <script src="{{ name: str }}wasm.js"></script>
+    <script src="{{ name: str }}.wasm.js"></script>
     <script src="{{ name: str }}.js"></script>
 </body>
 </html>"#;
@@ -839,7 +840,7 @@ if (typeof Rust === "undefined") {
 }(this, function () {
     return (function (module_factory) {
         var instance = module_factory();
-        var buffer = loadWebAssembly().buffer;
+        var buffer = module.exports().buffer;
 
         WebAssembly.compile(buffer).then(function (mod) {
             var wasm_instance = WebAssembly.instantiate(mod, instance.imports);
