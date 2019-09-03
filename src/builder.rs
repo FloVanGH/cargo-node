@@ -66,12 +66,12 @@ impl Builder {
         }
 
         // copy all cargo-web output files to cargo-node output dir
-        let cargo_node_output_dir = format!("target/cargo-node{}", path_extension);
+        let cargo_node_output_dir = format!("target/electron{}", path_extension);
         fs::create_dir_all(cargo_node_output_dir.clone()).unwrap();
 
         match config.target {
             Target::Electron => {
-                println!("\ncopy files to cargo-node/");
+                println!("\ncopy files to electron/");
                 println!("\t{}", format!("{}.d", app_name));
                 fs::copy(
                     format!("{}/{}.d", cargo_web_output_dir, app_name),
@@ -120,7 +120,7 @@ impl Builder {
 
                 let package_json = Sigma::new(PACKAGE_JSON_TEMPLATE)
                     .bind("name", app_name.as_str())
-                    .parse() 
+                    .parse()
                     .expect("Could not parse package.json template.")
                     .compile()
                     .expect("Could not compile package.json template.");
@@ -142,14 +142,81 @@ impl Builder {
                 );
             }
             Target::Android => {
-                // todo
+                let cordova_output_dir = format!("target/cordova{}", path_extension);
+                fs::create_dir_all(format!("{}/www", cordova_output_dir)).unwrap();
+
+                // run wasm2js
+                println!("\twasm2js");
+                Command::new("wasm2js")
+                    .arg(format!("{}/{}.wasm", cargo_web_output_dir, app_name))
+                    .arg("-o")
+                    .arg(format!("{}/www/{}.wasm.js", cordova_output_dir, app_name))
+                    .output()
+                    .expect("Could not run electron-packager.");
+
+                let package_json = Sigma::new(CORDOVA_PACKAGE_JSON_TEMPLATE)
+                    .bind("name", app_name.as_str())
+                    .parse()
+                    .expect("Could not parse package.json template.")
+                    .compile()
+                    .expect("Could not compile package.json template.");
+
+                save_template(package_json, format!("{}/package.json", cordova_output_dir));
+
+                let config_xml = Sigma::new(CORDOVA_CONFIG_XML_TEMPLATE)
+                    .bind("name", app_name.as_str())
+                    .parse()
+                    .expect("Could not parse config.xml template.")
+                    .compile()
+                    .expect("Could not compile config.xml template.");
+
+                save_template(config_xml, format!("{}/config.xml", cordova_output_dir));
+
+                let compile_wasm_js = Sigma::new(CORDOVA_COMPILE_WASM_JS_TEMPLATE)
+                    .parse()
+                    .expect("Could not parse compile_wasm.js template.")
+                    .compile()
+                    .expect("Could not compile compile_wasm.js template.");
+
+                save_template(
+                    compile_wasm_js,
+                    format!("{}/www/compile_wasm.js", cordova_output_dir),
+                );
+
+                let index_html = Sigma::new(BROWSER_INDEX_HTML_TEMPLATE)
+                    .bind("name", app_name.as_str())
+                    .parse()
+                    .expect("Could not parse index.html template.")
+                    .compile()
+                    .expect("Could not compile index.hml template.");
+
+                save_template(index_html, format!("{}/www/index.html", cordova_output_dir));
+
+                 let app_js = Sigma::new(CARGO_WEB_BROWSER_JS)
+                    .parse()
+                    .expect("Could not parse app js template.")
+                    .compile()
+                    .expect("Could not compile app js template.");
+
+                save_template(app_js, format!("{}/www/{}.js", cordova_output_dir, app_name));
+
+                println!("\ncordova platform add android");
+                Command::new("cordova")
+                    .current_dir(cordova_output_dir.clone())
+                    .arg("platform")
+                    .arg("add")
+                    .arg("android")
+                    .output()
+                    .expect("Could not run electron-packager.");
+
+                // run cordova 
+                return cordova_output_dir;
             }
             _ => {}
         }
 
         // npm install
-        if config.target == Target::Electron
-        {
+        if config.target == Target::Electron {
             println!("\nnpm install.");
 
             Command::new("npm")

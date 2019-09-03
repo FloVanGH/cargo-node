@@ -32,21 +32,16 @@ app.on('activate', function () {
 pub const PACKAGE_JSON_TEMPLATE: &'static str = r#"{
   "name": "{{ name: str }}",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "Build by cargo-node.",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
-  "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
     "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "Rust",
+    "Wasm",
   ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^6.0.3"
   }

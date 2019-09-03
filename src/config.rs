@@ -156,6 +156,7 @@ impl From<Vec<String>> for Config {
 
             if found_target {
                 target = Target::from(arg.clone());
+                found_target = false;
             }
 
             if !package_arg.is_empty() && package.is_none() {
