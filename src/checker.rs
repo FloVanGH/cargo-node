@@ -42,6 +42,10 @@ impl Checker {
 
                     println!("{}", String::from_utf8_lossy(&output.stdout).into_owned());
                 }
+            }
+            // check and install wasm2js if needed
+            Target::Browser => {
+                self.install_wasm_2_js();
             },
             // check and install if needed cordova
             Target::Android | Target::IOS => {
@@ -57,7 +61,9 @@ impl Checker {
 
                     println!("{}", String::from_utf8_lossy(&output.stdout).into_owned());
                 }
-            },
+
+                self.install_wasm_2_js();
+            }
             _ => {}
         }
     }
@@ -78,6 +84,20 @@ impl Checker {
             }
         }
         false
+    }
+
+    fn install_wasm_2_js(&self) {
+        if !self.is_program_in_path("wasm2js") {
+             println!("\ninstall wasm2js");
+            let output = Command::new("npm")
+                .arg("install")
+                .arg("-g")
+                .arg("wasm2js")
+                .output()
+                .expect("Could not install wasm2js.");
+
+                  println!("{}", String::from_utf8_lossy(&output.stdout).into_owned());
+        }
     }
 
     fn check_npm(&self) {

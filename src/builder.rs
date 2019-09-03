@@ -17,7 +17,7 @@ impl Builder {
         let mut file = fs::File::create(path.clone())
             .expect(format!("Could not create {} file.", path).as_str());
         file.write_all(template.as_bytes())
-            .expect("Could not write to index.html");
+            .expect(format!("Could not write to {}", path).as_str());
     }
 
     /// Runs the build process. Returns the output director.
@@ -64,95 +64,92 @@ impl Builder {
         let cargo_node_output_dir = format!("target/cargo-node{}", path_extension);
         fs::create_dir_all(cargo_node_output_dir.clone()).unwrap();
 
-        println!("\ncopy files to cargo-node/.\n");
-
-        fs::copy(
-            format!("{}/{}.d", cargo_web_output_dir, app_name),
-            format!("{}/{}.d", cargo_node_output_dir, app_name),
-        )
-        .unwrap();
-
-        fs::copy(
-            format!("{}/{}.js", cargo_web_output_dir, app_name),
-            format!("{}/{}.js", cargo_node_output_dir, app_name),
-        )
-        .unwrap();
-        fs::copy(
-            format!("{}/{}.wasm", cargo_web_output_dir, app_name),
-            format!("{}/{}.wasm", cargo_node_output_dir, app_name),
-        )
-        .unwrap();
+        match config.target {
+            Target::Electron => {
+                println!("\ncopy files to cargo-node/");
+                println!("\t{}", format!("{}.d", app_name));
+                fs::copy(
+                    format!("{}/{}.d", cargo_web_output_dir, app_name),
+                    format!("{}/{}.d", cargo_node_output_dir, app_name),
+                )
+                .unwrap();
+                println!("\t{}", format!("{}.js", app_name));
+                fs::copy(
+                    format!("{}/{}.js", cargo_web_output_dir, app_name),
+                    format!("{}/{}.js", cargo_node_output_dir, app_name),
+                )
+                .unwrap();
+                println!("\t{}", format!("{}.wasm", app_name));
+                fs::copy(
+                    format!("{}/{}.wasm", cargo_web_output_dir, app_name),
+                    format!("{}/{}.wasm", cargo_node_output_dir, app_name),
+                )
+                .unwrap();
+            }
+            _ => {}
+        }
 
         // build templates
         println!("\ncreate templates");
-        let index_html = Sigma::new(DEFAULT_INDEX_HTML_TEMPLATE)
-            .bind("name", app_name.as_str())
-            .parse()
-            .expect("Could not parse index.html template.")
-            .compile()
-            .expect("Could not compile index.hml template.");
+        match config.target {
+            Target::Electron => {
+                let index_html = Sigma::new(DEFAULT_INDEX_HTML_TEMPLATE)
+                    .bind("name", app_name.as_str())
+                    .parse()
+                    .expect("Could not parse index.html template.")
+                    .compile()
+                    .expect("Could not compile index.hml template.");
 
-        self.save_template(index_html, format!("{}/index.html", cargo_node_output_dir));
+                self.save_template(index_html, format!("{}/index.html", cargo_node_output_dir));
+                let (width, height) = self.get_window_size(node_toml, app_name.as_str());
+                // todo load width height from node toml
+                let main_js = Sigma::new(MAIN_JS_TEMPLATE)
+                    .bind("width", width.as_str())
+                    .bind("height", height.as_str())
+                    .parse()
+                    .expect("Could not parse main.js template.")
+                    .compile()
+                    .expect("Could not compile main.js template.");
 
-        // Electron templates
-        if config.target == Target::Electron {
-            // todo refactor
-            let (width, height) = if let Some(node_toml) = node_toml {
-                if let Some(windows) = &node_toml.windows {
-                    if windows.len() == 1 {
-                        (windows[0].width.to_string(), windows[0].height.to_string())
-                    } else {
-                        let window = windows
-                            .iter()
-                            .filter(|w| w.name.as_ref().unwrap() == app_name.as_str())
-                            .next();
+                self.save_template(main_js, format!("{}/main.js", cargo_node_output_dir));
 
-                        if let Some(window) = window {
-                            (window.width.to_string(), window.height.to_string())
-                        } else {
-                            ("100".to_string(), "100".to_string())
-                        }
-                    }
-                } else {
-                    ("100".to_string(), "100".to_string())
-                }
-            } else {
-                ("100".to_string(), "100".to_string())
-            };
+                let package_json = Sigma::new(PACKAGE_JSON_TEMPLATE)
+                    .bind("name", app_name.as_str())
+                    .parse()
+                    .expect("Could not parse package.json template.")
+                    .compile()
+                    .expect("Could not compile package.json template.");
 
-            // todo load width height from node toml
-            let main_js = Sigma::new(MAIN_JS_TEMPLATE)
-                .bind("width", width.as_str())
-                .bind("height", height.as_str())
-                .parse()
-                .expect("Could not parse main.js template.")
-                .compile()
-                .expect("Could not compile main.js template.");
+                self.save_template(
+                    package_json,
+                    format!("{}/package.json", cargo_node_output_dir),
+                );
 
-            self.save_template(main_js, format!("{}/main.js", cargo_node_output_dir));
+                let package_json = Sigma::new(PRELOAD_JS_TEMPLATE)
+                    .parse()
+                    .expect("Could not parse preload.js template.")
+                    .compile()
+                    .expect("Could not compile preload.js template.");
 
-            let package_json = Sigma::new(PACKAGE_JSON_TEMPLATE)
-                .bind("name", app_name.as_str())
-                .parse()
-                .expect("Could not parse package.json template.")
-                .compile()
-                .expect("Could not compile package.json template.");
+                self.save_template(
+                    package_json,
+                    format!("{}/preload.js", cargo_node_output_dir),
+                );
+            }
+            Target::Browser => {
+                let index_html = Sigma::new(BROWSER_INDEX_HTML_TEMPLATE)
+                    .bind("name", app_name.as_str())
+                    .parse()
+                    .expect("Could not parse index.html template.")
+                    .compile()
+                    .expect("Could not compile index.hml template.");
 
-            self.save_template(
-                package_json,
-                format!("{}/package.json", cargo_node_output_dir),
-            );
-
-            let package_json = Sigma::new(PRELOAD_JS_TEMPLATE)
-                .parse()
-                .expect("Could not parse preload.js template.")
-                .compile()
-                .expect("Could not compile preload.js template.");
-
-            self.save_template(
-                package_json,
-                format!("{}/preload.js", cargo_node_output_dir),
-            );
+                self.save_template(index_html, format!("{}/index.html", cargo_node_output_dir));
+            }
+            Target::Android => {
+                // todo
+            }
+            _ => {}
         }
 
         // npm install
@@ -169,5 +166,30 @@ impl Builder {
         println!("\nfinished build.");
 
         cargo_node_output_dir
+    }
+
+    fn get_window_size(&self, node_toml: &Option<NodeToml>, app_name: &str) -> (String, String) {
+        return if let Some(node_toml) = node_toml {
+            if let Some(windows) = &node_toml.windows {
+                if windows.len() == 1 {
+                    (windows[0].width.to_string(), windows[0].height.to_string())
+                } else {
+                    let window = windows
+                        .iter()
+                        .filter(|w| w.name.as_ref().unwrap() == app_name)
+                        .next();
+
+                    if let Some(window) = window {
+                        (window.width.to_string(), window.height.to_string())
+                    } else {
+                        ("100".to_string(), "100".to_string())
+                    }
+                }
+            } else {
+                ("100".to_string(), "100".to_string())
+            }
+        } else {
+            ("100".to_string(), "100".to_string())
+        };
     }
 }
