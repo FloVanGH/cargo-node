@@ -40,6 +40,15 @@ impl Runner {
                     .output()
                     .expect("Could not run npm start.");
             }
+            Target::Android => {
+                println!("\ncordova run android");
+                Command::new("cordova")
+                    .current_dir(format!("{}/", dir))
+                    .arg("run")
+                    .arg("android")
+                    .output()
+                    .expect("Could not run cordova."); 
+            }
             _ => {}
         }
     }

@@ -152,7 +152,7 @@ impl Builder {
                     .arg("-o")
                     .arg(format!("{}/www/{}.wasm.js", cordova_output_dir, app_name))
                     .output()
-                    .expect("Could not run electron-packager.");
+                    .expect("Could not run wasm2js.");
 
                 let package_json = Sigma::new(CORDOVA_PACKAGE_JSON_TEMPLATE)
                     .bind("name", app_name.as_str())
@@ -192,13 +192,16 @@ impl Builder {
 
                 save_template(index_html, format!("{}/www/index.html", cordova_output_dir));
 
-                 let app_js = Sigma::new(CARGO_WEB_BROWSER_JS)
+                let app_js = Sigma::new(CARGO_WEB_BROWSER_JS)
                     .parse()
                     .expect("Could not parse app js template.")
                     .compile()
                     .expect("Could not compile app js template.");
 
-                save_template(app_js, format!("{}/www/{}.js", cordova_output_dir, app_name));
+                save_template(
+                    app_js,
+                    format!("{}/www/{}.js", cordova_output_dir, app_name),
+                );
 
                 println!("\ncordova platform add android");
                 Command::new("cordova")
@@ -207,9 +210,9 @@ impl Builder {
                     .arg("add")
                     .arg("android")
                     .output()
-                    .expect("Could not run electron-packager.");
+                    .expect("Could not run cordova.");
 
-                // run cordova 
+                // run cordova
                 return cordova_output_dir;
             }
             _ => {}

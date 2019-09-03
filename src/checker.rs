@@ -28,7 +28,7 @@ impl Checker {
         }
 
         match config.target {
-             Target::Electron => {
+            Target::Electron => {
                 self.check_npm();
 
                 if config.mode == Mode::Deploy && !self.is_program_in_path("electron-packager") {
@@ -46,7 +46,7 @@ impl Checker {
             // check and install wasm2js if needed
             Target::Browser => {
                 self.install_wasm_2_js();
-            },
+            }
             // check and install if needed cordova
             Target::Android => {
                 if !self.is_program_in_path("cordova") {
@@ -88,7 +88,7 @@ impl Checker {
 
     fn install_wasm_2_js(&self) {
         if !self.is_program_in_path("wasm2js") {
-             println!("\ninstall wasm2js");
+            println!("\ninstall wasm2js");
             let output = Command::new("npm")
                 .arg("install")
                 .arg("-g")
@@ -96,7 +96,7 @@ impl Checker {
                 .output()
                 .expect("Could not install wasm2js.");
 
-                  println!("{}", String::from_utf8_lossy(&output.stdout).into_owned());
+            println!("{}", String::from_utf8_lossy(&output.stdout).into_owned());
         }
     }
 

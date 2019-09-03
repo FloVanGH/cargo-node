@@ -1,4 +1,3 @@
-
 pub const CORDOVA_PACKAGE_JSON_TEMPLATE: &'static str = r#"{
   "name": "{{ name: str }}",
   "displayName": "{{ name: str }}",

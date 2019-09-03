@@ -2,9 +2,7 @@ use std::fs;
 
 use sigma::Sigma;
 
-use crate::{
-    builder::save_template, cargo_toml::*, command::Command, config::*, templates::*,
-};
+use crate::{builder::save_template, cargo_toml::*, command::Command, config::*, templates::*};
 
 /// Deploys the project with the given settings.
 pub struct Deployer;
