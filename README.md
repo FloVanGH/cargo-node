@@ -3,7 +3,7 @@
 [![pipeline status](https://gitlab.com/FloVanGL/cargo-node/badges/master/pipeline.svg)](https://gitlab.com/FloVanGL/cargo-node/commits/master)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-A cargo sub command to build, run and deploy rust wasm applications as electron or cordova app.
+A cargo sub command to build, run and deploy rust wasm applications as browser, electron or cordova app.
 
 ## Features
 
@@ -11,16 +11,33 @@ tbd
 
 ## Installation
 
-tdb
+```sh
+cargo install cargo-node
+```
 
-## Node.tml
+Before you could use cargo-node you have to install `npm` version 6.9.0. It is included in the `Node.js` version 10.16.3. You could download it from https://nodejs.org/dist/v10.16.3/. 
 
-tbd
+Rust's `cargo` is presumed. All other dependencies of cargo-node will be installed automatic.
 
+## Node.toml
+
+`cargo-node` provides an optional configuration file which you can put next to `cargo`'s [`Cargo.toml`].
+
+Example:
+
+```toml
+[[windows]]
+# Defines the title of the electron window
+name = "my app"
+# Defines the window width of the electron window
+width = 300
+# Defines the height of the electorn window
+height = 100
+```
 
 ## Tools under the hood 
 
-* cargo-web (Apache-2.0): https://github.com/koute/cargo-web used to build your rust application as client-side web application
+* cargo-web  (Apache-2.0): https://github.com/koute/cargo-web used to build your rust application as client-side web application
 * npm (The Artistic License 2.0): https://github.com/npm/cli used to install and handle electron, electron-packer and cordova 
 * electron (MIT): https://github.com/electron/electron used to build, run desktop applications for Linux, macOS and Windows
 * electron-packager (BSD-2-Clause): https://github.com/electron/electron-packager used to deploy desktop applications for Linux, macOS and Windows

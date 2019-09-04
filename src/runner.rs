@@ -47,7 +47,7 @@ impl Runner {
                     .arg("run")
                     .arg("android")
                     .output()
-                    .expect("Could not run cordova."); 
+                    .expect("Could not run cordova.");
             }
             _ => {}
         }

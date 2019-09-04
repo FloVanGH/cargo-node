@@ -21,6 +21,8 @@ impl Checker {
                 .arg("--color")
                 .arg("always")
                 .arg("cargo-web")
+                .arg("--vers")
+                .arg("0.6.26")
                 .output()
                 .expect("Could not install cargo-web.");
 
@@ -31,12 +33,24 @@ impl Checker {
             Target::Electron => {
                 self.check_npm();
 
-                if config.mode == Mode::Deploy && !self.is_program_in_path("electron-packager") {
+                if !self.is_program_in_path("electron") {
+                    println!("\ninstall electron");
+                    let output = Command::new("npm")
+                        .arg("install")
+                        .arg("-g")
+                        .arg("electron@6.0.7")
+                        .output()
+                        .expect("Could not install electron-packager.");
+
+                    println!("{}", String::from_utf8_lossy(&output.stdout).into_owned());
+                }
+
+                if config.task == Task::Deploy && !self.is_program_in_path("electron-packager") {
                     println!("\ninstall electron-packager");
                     let output = Command::new("npm")
                         .arg("install")
                         .arg("-g")
-                        .arg("electron-packager")
+                        .arg("electron-packager@14.0.5")
                         .output()
                         .expect("Could not install electron-packager.");
 
@@ -55,7 +69,7 @@ impl Checker {
                     let output = Command::new("npm")
                         .arg("install")
                         .arg("-g")
-                        .arg("cordova")
+                        .arg("cordova@9.0.0")
                         .output()
                         .expect("Could not install cordova.");
 
@@ -92,7 +106,7 @@ impl Checker {
             let output = Command::new("npm")
                 .arg("install")
                 .arg("-g")
-                .arg("wasm2js")
+                .arg("wasm2js@0.2.0")
                 .output()
                 .expect("Could not install wasm2js.");
 

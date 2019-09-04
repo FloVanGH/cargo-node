@@ -30,6 +30,7 @@ impl Builder {
         // build with cargo web
         let mut cargo_web_command = Command::new("cargo-web").arg("build");
         let mut path_extension = "";
+        let mut mode_path = "debug";
         let mut app_name = if let Some(package) = &cargo_toml.package {
             if let Some(name) = &package.name {
                 name.clone()
@@ -54,12 +55,17 @@ impl Builder {
             _ => {}
         }
 
+        if config.mode == Mode::Release || config.task == Task::Deploy {
+            cargo_web_command = cargo_web_command.arg("--release");
+            mode_path = "release";
+        }
+
         println!("Run cargo-web.");
         cargo_web_command
             .output()
             .expect("Could not build with cargo-web.");
 
-        let cargo_web_output_dir = format!("target/wasm32-unknown-unknown/debug{}", path_extension);
+        let cargo_web_output_dir = format!("target/wasm32-unknown-unknown/{}{}", mode_path, path_extension);
 
         if config.target == Target::Browser {
             return cargo_web_output_dir;
@@ -173,6 +179,7 @@ impl Builder {
                 save_template(config_xml, format!("{}/config.xml", cordova_output_dir));
 
                 let compile_wasm_js = Sigma::new(CORDOVA_COMPILE_WASM_JS_TEMPLATE)
+                    .bind("name", app_name.as_str())
                     .parse()
                     .expect("Could not parse compile_wasm.js template.")
                     .compile()
@@ -193,6 +200,7 @@ impl Builder {
                 save_template(index_html, format!("{}/www/index.html", cordova_output_dir));
 
                 let app_js = Sigma::new(CARGO_WEB_BROWSER_JS)
+                    .bind("name", app_name.as_str())
                     .parse()
                     .expect("Could not parse app js template.")
                     .compile()
@@ -211,6 +219,19 @@ impl Builder {
                     .arg("android")
                     .output()
                     .expect("Could not run cordova.");
+
+                println!("\ncordova build android");
+
+                let mut cordova_command = Command::new("cordova")
+                    .current_dir(cordova_output_dir.clone())
+                    .arg("build")
+                    .arg("android");
+
+                // if config.mode == Mode::Release || config.task == Task::Deploy {
+                //     cordova_command = cordova_command.arg("--release");
+                // }
+
+                cordova_command.output().expect("Could not run cordova.");
 
                 // run cordova
                 return cordova_output_dir;

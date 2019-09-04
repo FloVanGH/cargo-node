@@ -1,6 +1,33 @@
-/// Describes the mode of the application (build|run).
+/// Describes the task task of the application (debug release).
 #[derive(Debug, PartialEq)]
 pub enum Mode {
+    /// Debug task.
+    Debug,
+    /// Release task.
+    Release,
+}
+
+impl From<&str> for Mode {
+    fn from(s: &str) -> Self {
+        match s {
+            "debug" => Mode::Debug,
+            "release" => Mode::Release,
+            _ => {
+                panic!("Unknown  mode: {}", s);
+            }
+        }
+    }
+}
+
+impl Default for Mode {
+    fn default() -> Self {
+        Mode::Debug
+    }
+}
+
+/// Describes the task of the application (build|run|clear|deploy).
+#[derive(Debug, PartialEq)]
+pub enum Task {
     /// Compiles the current package.
     Build,
     /// Compiles and run the current package.
@@ -11,29 +38,29 @@ pub enum Mode {
     Deploy,
 }
 
-impl Default for Mode {
+impl Default for Task {
     fn default() -> Self {
-        Mode::Build
+        Task::Build
     }
 }
 
-impl From<&str> for Mode {
+impl From<&str> for Task {
     fn from(s: &str) -> Self {
         match s {
-            "build" => Mode::Build,
-            "run" => Mode::Run,
-            "clear" => Mode::Clear,
-            "deploy" => Mode::Deploy,
+            "build" => Task::Build,
+            "run" => Task::Run,
+            "clear" => Task::Clear,
+            "deploy" => Task::Deploy,
             _ => {
-                panic!("Unknown mode: {}", s);
+                panic!("Unknown task: {}", s);
             }
         }
     }
 }
 
-impl From<String> for Mode {
+impl From<String> for Task {
     fn from(s: String) -> Self {
-        Mode::from(s.as_str())
+        Task::from(s.as_str())
     }
 }
 
@@ -44,7 +71,7 @@ pub enum Target {
     Browser,
     Android,
     // IOS,
-    /// Used only by clear mode.
+    /// Used only by clear task.
     None,
 }
 
@@ -83,7 +110,7 @@ pub enum Package {
     Example(String),
     /// Use the scope package.
     Scope,
-    /// Used only by clear mode.
+    /// Used only by clear task.
     None,
 }
 
@@ -113,6 +140,7 @@ impl From<(String, String)> for Package {
 
 #[derive(Debug)]
 pub struct Config {
+    pub task: Task,
     pub mode: Mode,
     pub target: Target,
     pub package: Package,
@@ -120,17 +148,18 @@ pub struct Config {
 
 impl From<Vec<String>> for Config {
     fn from(args: Vec<String>) -> Self {
-        let mut mode = None;
+        let mut task = None;
+        let mut mode = Mode::default();
         let mut target = Target::Electron;
         let mut package = None;
         let mut found_target = false;
         let mut package_arg = String::default();
 
         for arg in args {
-            // mode must be the first argument
-            if mode.is_none() {
-                mode = Some(Mode::from(arg));
-                if *mode.as_ref().unwrap() == Mode::Clear {
+            // task must be the first argument
+            if task.is_none() {
+                task = Some(Task::from(arg));
+                if *task.as_ref().unwrap() == Task::Clear {
                     target = Target::None;
                     package = Some(Package::None);
                     break;
@@ -151,6 +180,10 @@ impl From<Vec<String>> for Config {
                     package_arg = arg.clone();
                     continue;
                 }
+                "--release" => {
+                    mode = Mode::Release;
+                    continue;
+                }
                 _ => {}
             }
 
@@ -164,8 +197,8 @@ impl From<Vec<String>> for Config {
             }
         }
 
-        if mode.is_none() {
-            panic!("No mode (build|run|clear) is given.")
+        if task.is_none() {
+            panic!("No task (build|run|clear) is given.")
         }
 
         if package.is_none() {
@@ -174,7 +207,8 @@ impl From<Vec<String>> for Config {
 
         // unwrap because if not set the application panics before.
         Config {
-            mode: mode.unwrap(),
+            task: task.unwrap(),
+            mode,
             target: target,
             package: package.unwrap(),
         }
@@ -192,7 +226,7 @@ mod tests {
             .map(|a| a.to_string())
             .collect();
         let config = Config::from(args);
-        assert_eq!(config.mode, Mode::Build);
+        assert_eq!(config.task, Task::Build);
         assert_eq!(config.target, Target::Electron);
         assert_eq!(config.package, Package::Bin("test".to_string()));
 
@@ -201,7 +235,7 @@ mod tests {
             .map(|a| a.to_string())
             .collect();
         let config = Config::from(args);
-        assert_eq!(config.mode, Mode::Build);
+        assert_eq!(config.task, Task::Build);
         assert_eq!(config.target, Target::Browser);
         assert_eq!(config.package, Package::Bin("test".to_string()));
 
@@ -210,7 +244,7 @@ mod tests {
             .map(|a| a.to_string())
             .collect();
         let config = Config::from(args);
-        assert_eq!(config.mode, Mode::Build);
+        assert_eq!(config.task, Task::Build);
         assert_eq!(config.target, Target::Android);
         assert_eq!(config.package, Package::Bin("test".to_string()));
 
@@ -219,7 +253,7 @@ mod tests {
             .map(|a| a.to_string())
             .collect();
         let config = Config::from(args);
-        assert_eq!(config.mode, Mode::Build);
+        assert_eq!(config.task, Task::Build);
         assert_eq!(config.target, Target::Electron);
         assert_eq!(config.package, Package::Bin("test".to_string()));
 
@@ -228,7 +262,7 @@ mod tests {
             .map(|a| a.to_string())
             .collect();
         let config = Config::from(args);
-        assert_eq!(config.mode, Mode::Build);
+        assert_eq!(config.task, Task::Build);
         assert_eq!(config.target, Target::Electron);
         assert_eq!(config.package, Package::Example("test".to_string()));
 
@@ -238,7 +272,7 @@ mod tests {
             .collect();
 
         let config = Config::from(args);
-        assert_eq!(config.mode, Mode::Build);
+        assert_eq!(config.task, Task::Build);
         assert_eq!(config.target, Target::Electron);
         assert_eq!(config.package, Package::Scope);
 
@@ -248,13 +282,13 @@ mod tests {
             .collect();
 
         let config = Config::from(args);
-        assert_eq!(config.mode, Mode::Run);
+        assert_eq!(config.task, Task::Run);
         assert_eq!(config.target, Target::Electron);
         assert_eq!(config.package, Package::Scope);
 
         let args: Vec<String> = vec!["clear"].iter().map(|a| a.to_string()).collect();
         let config = Config::from(args);
-        assert_eq!(config.mode, Mode::Clear);
+        assert_eq!(config.task, Task::Clear);
         assert_eq!(config.target, Target::None);
         assert_eq!(config.package, Package::None);
 
@@ -264,7 +298,7 @@ mod tests {
             .collect();
 
         let config = Config::from(args);
-        assert_eq!(config.mode, Mode::Deploy);
+        assert_eq!(config.task, Task::Deploy);
         assert_eq!(config.target, Target::Electron);
         assert_eq!(config.package, Package::Scope);
     }

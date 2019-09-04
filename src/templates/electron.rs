@@ -40,7 +40,7 @@ pub const PACKAGE_JSON_TEMPLATE: &'static str = r#"{
   "keywords": [
     "Electron",
     "Rust",
-    "Wasm",
+    "Wasm"
   ],
   "devDependencies": {
     "electron": "^6.0.3"

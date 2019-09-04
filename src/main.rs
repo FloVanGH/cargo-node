@@ -31,8 +31,10 @@ fn main() {
     let config = Config::from(args.clone());
 
     // Clears the output.
-    if config.mode == Mode::Clear {
+    if config.task == Task::Clear {
         fs::remove_dir_all("target/cargo-node/").unwrap();
+        fs::remove_dir_all("target/electron/").unwrap();
+        fs::remove_dir_all("target/cordova/").unwrap();
         return;
     }
 
@@ -60,11 +62,11 @@ fn main() {
     // run builder
     let output_dir = Builder::new().run(&config, &cargo_toml, &node_toml);
 
-    match config.mode {
-        Mode::Run => {
+    match config.task {
+        Task::Run => {
             Runner::new().run(&config, output_dir.as_str());
         }
-        Mode::Deploy => {
+        Task::Deploy => {
             Deployer::new().run(&config, &cargo_toml, output_dir.as_str());
         }
         _ => {}

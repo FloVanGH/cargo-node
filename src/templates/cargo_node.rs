@@ -73,10 +73,8 @@ if (typeof Rust === "undefined") {
         define([], factory);
     } else if (typeof module === "object" && module.exports) {
         factory();
-        // module.exports = factory();
     } else {
         factory();
-        // Rust.widgets = factory();
     }
 }(this, function () {
     return (function (module_factory) {
@@ -85,14 +83,14 @@ if (typeof Rust === "undefined") {
 
         WebAssembly.compile(buffer).then(function (mod) {
             var wasm_instance = WebAssembly.instantiate(mod, instance.imports);
-            Rust.widgets = wasm_instance
+            Rust.{{ name: str}} = wasm_instance
                 .then(function (wasm_instance) {
                     var exports = instance.initialize(wasm_instance);
-                    console.log("Finished loading Rust wasm module 'widgets'");
+                    console.log("Finished loading Rust wasm module '{{ name: str}}'");
                     return exports;
                 })
                 .catch(function (error) {
-                    console.log("Error loading Rust wasm module 'widgets':", error);
+                    console.log("Error loading Rust wasm module '{{ name: str}}':", error);
                     throw error;
                 });
         }).catch(function (error) {
