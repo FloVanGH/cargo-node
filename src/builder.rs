@@ -179,7 +179,6 @@ impl Builder {
                 save_template(config_xml, format!("{}/config.xml", cordova_output_dir));
 
                 let compile_wasm_js = Sigma::new(CORDOVA_COMPILE_WASM_JS_TEMPLATE)
-                    .bind("name", app_name.as_str())
                     .parse()
                     .expect("Could not parse compile_wasm.js template.")
                     .compile()
@@ -199,7 +198,7 @@ impl Builder {
 
                 save_template(index_html, format!("{}/www/index.html", cordova_output_dir));
 
-                let app_js = Sigma::new(CARGO_WEB_BROWSER_JS)
+                let app_js = Sigma::new(CORDOVA_ANDROID_JS)
                     .bind("name", app_name.as_str())
                     .parse()
                     .expect("Could not parse app js template.")

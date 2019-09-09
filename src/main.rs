@@ -26,7 +26,7 @@ mod templates;
 
 fn main() {
     // Build config file
-    let mut args: Vec<String> = env::args().collect();
+    let mut args: Vec<String> = env::args().filter(|a| a != "node" && a!= "cargo").collect();
     args.remove(0);
     let config = Config::from(args.clone());
 

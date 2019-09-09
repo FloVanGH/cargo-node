@@ -54,14 +54,6 @@ pub const BROWSER_INDEX_HTML_TEMPLATE: &'static str = r#"<!DOCTYPE html>
 </body>
 </html>"#;
 
-pub const LOAD_WASM_JS: &'static str = r#"onmessage = function (e) {
-    WebAssembly.compile(e.data[0]).then(function(mod) { 
-        this.postMessage(mod);
-    }).catch(function (error) {
-        console.log(error)
-    })
-}"#;
-
 pub const CARGO_WEB_BROWSER_JS : &'static str = r#""use strict";
 
 if (typeof Rust === "undefined") {

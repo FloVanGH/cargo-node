@@ -7,7 +7,46 @@ A cargo sub command to build, run and deploy rust wasm applications as browser, 
 
 ## Features
 
-tbd
+Currently you could use the following commands:
+
+* Build your project:
+
+```sh
+cargo-node build
+```
+
+* Run your project:
+
+```sh
+cargo-node run
+```
+
+* Deploy your project:
+
+```sh
+cargo-node deploy
+```
+
+You could use the following flags additional flags on the command line:
+
+* Define the target platform (electron | browser | android) default is electron:
+
+```sh
+cargo-node run --target browser
+```
+
+* Switch to release build:
+
+```sh
+cargo-node deploy --release
+```
+
+* Build, run or deploy an example:
+
+```sh
+cargo-node run --example my_example
+```
+
 
 ## Installation
 
@@ -27,7 +66,7 @@ Example:
 
 ```toml
 [[windows]]
-# Defines the title of the electron window
+# Name of the executable
 name = "my app"
 # Defines the window width of the electron window
 width = 300
