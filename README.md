@@ -1,6 +1,5 @@
 # cargo-node
 
-[![pipeline status](https://gitlab.com/FloVanGL/cargo-node/badges/master/pipeline.svg)](https://gitlab.com/FloVanGL/cargo-node/commits/master)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 A cargo sub command to build, run and deploy rust wasm applications as browser, electron or cordova app.
