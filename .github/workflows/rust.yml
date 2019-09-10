@@ -3,15 +3,15 @@ name: Rust
 on: [push]
 
 jobs:
-  build_macOS:
+  build:
     name: Build and test on macOS
     runs-on: macOS-latest
 
-  steps:
-  - uses: actions/checkout@v1
-  - name: Install cargo
-    run: brew install rust
-  - name: Build
-    run: cargo build --verbose
-  - name: Runj tests
-    run: cargo test --verbose
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install rust
+      run: brew install rust
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
