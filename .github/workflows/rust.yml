@@ -3,7 +3,7 @@ name: Rust
 on: [push]
 
 jobs:
-  build:
+  build_macos:
     name: Build and test on macOS
     runs-on: macOS-latest
 
