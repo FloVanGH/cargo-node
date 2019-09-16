@@ -91,9 +91,14 @@ impl Checker {
             };
 
             for p in path.split(splitter) {
-                let p_str = format!("{}/{}", p, program);
-                if fs::metadata(p_str).is_ok() {
-                    return true;
+                if let Ok(dir) = fs::read_dir(p) {
+                    for entry in dir {
+                        if let Ok(entry) = entry {
+                            if entry.file_name().into_string().unwrap().starts_with(program) {
+                                return true;
+                            }
+                        }
+                    }
                 }
             }
         }

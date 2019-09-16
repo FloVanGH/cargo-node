@@ -1,7 +1,8 @@
+use std::{fs, io::prelude::*};
+
 use sigma::*;
 
 use crate::{cargo_toml::*, command::Command, config::*, node_toml::*, templates::*};
-use std::{fs, io::Write};
 
 /// Builds the project with the given settings.
 pub struct Builder;
@@ -65,9 +66,32 @@ impl Builder {
             .output()
             .expect("Could not build with cargo-web.");
 
-        let cargo_web_output_dir = format!("target/wasm32-unknown-unknown/{}{}", mode_path, path_extension);
+        let cargo_web_output_dir = format!(
+            "target/wasm32-unknown-unknown/{}{}",
+            mode_path, path_extension
+        );
 
         if config.target == Target::Browser {
+            if let Some(node_toml) = node_toml {
+                if let Some(assets) = node_toml.assets(app_name.as_str()) {
+                    println!("Copy assets for cargo-web.");
+                    let asset_dir = format!("static/{}", assets);
+
+                    fs::create_dir_all(asset_dir.clone()).unwrap();
+
+                    for entry in fs::read_dir(assets).unwrap() {
+                        let file_name = entry.unwrap().file_name().into_string().unwrap();
+                        println!("{}/{}", assets, file_name);
+                        println!("{}/{}", asset_dir, file_name);
+                        fs::copy(
+                            format!("{}/{}", assets, file_name),
+                            format!("{}/{}", asset_dir, file_name),
+                        )
+                        .unwrap();
+                    }
+                }
+            }
+
             return cargo_web_output_dir;
         }
 
@@ -198,8 +222,20 @@ impl Builder {
 
                 save_template(index_html, format!("{}/www/index.html", cordova_output_dir));
 
+                let mut file =
+                    fs::File::open(format!("{}/{}.js", cargo_web_output_dir, app_name)).unwrap();
+                let mut contents = String::new();
+                file.read_to_string(&mut contents).unwrap();
+
+                let std_web_start = contents.find("var Module = {};").unwrap();
+                let std_web_end = contents.find("return Module.exports;").unwrap()
+                    + "return Module.exports;".len();
+
+                let std_web_part = contents.get(std_web_start..std_web_end);
+
                 let app_js = Sigma::new(CORDOVA_ANDROID_JS)
                     .bind("name", app_name.as_str())
+                    .bind("std_web", std_web_part.unwrap())
                     .parse()
                     .expect("Could not parse app js template.")
                     .compile()
@@ -209,6 +245,25 @@ impl Builder {
                     app_js,
                     format!("{}/www/{}.js", cordova_output_dir, app_name),
                 );
+
+                // todo: fix redundant code (asset loading)
+                if let Some(node_toml) = node_toml {
+                    if let Some(assets) = node_toml.assets(app_name.as_str()) {
+                        println!("Copy assets for cargo-web.");
+                        let asset_dir = format!("{}/www/{}", cordova_output_dir, assets);
+
+                        fs::create_dir_all(asset_dir.clone()).unwrap();
+
+                        for entry in fs::read_dir(assets).unwrap() {
+                            let file_name = entry.unwrap().file_name().into_string().unwrap();
+                            fs::copy(
+                                format!("{}/{}", assets, file_name),
+                                format!("{}/{}", asset_dir, file_name),
+                            )
+                            .unwrap();
+                        }
+                    }
+                }
 
                 println!("\ncordova platform add android");
                 Command::new("cordova")
@@ -249,6 +304,26 @@ impl Builder {
                 .expect("Could not run npm install.");
         }
 
+        println!("Copy assets.");
+
+        if let Some(node_toml) = node_toml {
+            if let Some(assets) = node_toml.assets(app_name.as_str()) {
+                println!("Copy assets for cargo-web.");
+                let asset_dir = format!("{}/{}", cargo_node_output_dir, assets);
+
+                fs::create_dir_all(asset_dir.clone()).unwrap();
+
+                for entry in fs::read_dir(assets).unwrap() {
+                    let file_name = entry.unwrap().file_name().into_string().unwrap();
+                    fs::copy(
+                        format!("{}/{}", assets, file_name),
+                        format!("{}/{}", asset_dir, file_name),
+                    )
+                    .unwrap();
+                }
+            }
+        }
+
         println!("\nfinished build.");
 
         cargo_node_output_dir
@@ -256,14 +331,11 @@ impl Builder {
 
     fn get_window_size(&self, node_toml: &Option<NodeToml>, app_name: &str) -> (String, String) {
         return if let Some(node_toml) = node_toml {
-            if let Some(windows) = &node_toml.windows {
+            if let Some(windows) = &node_toml.apps {
                 if windows.len() == 1 {
                     (windows[0].width.to_string(), windows[0].height.to_string())
                 } else {
-                    let window = windows
-                        .iter()
-                        .filter(|w| w.name.as_ref().unwrap() == app_name)
-                        .next();
+                    let window = windows.iter().filter(|w| w.name == app_name).next();
 
                     if let Some(window) = window {
                         (window.width.to_string(), window.height.to_string())

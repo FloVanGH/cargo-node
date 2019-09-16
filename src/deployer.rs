@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, io::prelude::*};
 
 use sigma::Sigma;
 
@@ -68,8 +68,18 @@ impl Deployer {
 
                 save_template(index_html, format!("{}/index.html", deploy_path));
 
+                let mut file = fs::File::open(format!("{}/{}.js", output_dir, app_name)).unwrap();
+                let mut contents = String::new();
+                file.read_to_string(&mut contents).unwrap();
+
+                let std_web_start = contents.find("var Module = {};").unwrap();
+                let std_web_end = contents.find("return Module.exports;").unwrap() + "return Module.exports;".len();
+
+                let std_web_part = contents.get(std_web_start..std_web_end);
+
                 let app_js = Sigma::new(CARGO_WEB_BROWSER_JS)
-                    .bind("name", app_name.as_str())
+                    .bind("name", app_name.replace("-", "_").as_str())
+                    .bind("std_web", std_web_part.unwrap())
                     .parse()
                     .expect("Could not parse app js template.")
                     .compile()
@@ -82,9 +92,13 @@ impl Deployer {
                 let deploy_path = format!("target/{}-android", app_name);
                 fs::create_dir_all(deploy_path.as_str()).unwrap();
                 fs::copy(
-                    format!("{}/platforms/android/app/build/outputs/apk/debug/app-debug.apk", output_dir),
+                    format!(
+                        "{}/platforms/android/app/build/outputs/apk/debug/app-debug.apk",
+                        output_dir
+                    ),
                     format!("{}/{}.apk", deploy_path, app_name),
-                ).unwrap();
+                )
+                .unwrap();
             }
             _ => {}
         }

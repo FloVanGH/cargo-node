@@ -1,5 +1,6 @@
 # cargo-node
 
+[![Build and test](https://github.com/FloVanGH/cargo-node/workflows/Build%20and%20test/badge.svg)](https://github.com/FloVanGH/cargo-node/actions)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 A cargo sub command to build, run and deploy rust wasm applications as browser, electron or cordova app.
@@ -11,66 +12,68 @@ Currently you could use the following commands:
 * Build your project:
 
 ```sh
-cargo-node build
+cargo node build
 ```
 
 * Run your project:
 
 ```sh
-cargo-node run
+cargo node run
 ```
 
 * Deploy your project:
 
 ```sh
-cargo-node deploy
+cargo node deploy
 ```
 
-You could use the following flags additional flags on the command line:
+You could use the additional flags on the command line:
 
 * Define the target platform (electron | browser | android) default is electron:
 
 ```sh
-cargo-node run --target browser
+cargo node run --target browser
 ```
 
 * Switch to release build:
 
 ```sh
-cargo-node deploy --release
+cargo node deploy --release
 ```
 
 * Build, run or deploy an example:
 
 ```sh
-cargo-node run --example my_example
+cargo node run --example my_example
 ```
 
 
 ## Installation
 
 ```sh
-cargo install cargo-node
+cargo install cargo node
 ```
 
-Before you could use cargo-node you have to install `npm` version 6.9.0. It is included in the `Node.js` version 10.16.3. You could download it from https://nodejs.org/dist/v10.16.3/. 
+Before you could use cargo node you have to install `npm` version 6.9.0. It is included in the `Node.js` version 10.16.3. You could download it from https://nodejs.org/dist/v10.16.3/. 
 
-Rust's `cargo` is presumed. All other dependencies of cargo-node will be installed automatic.
+Rust's `cargo` is presumed. All other dependencies of cargo node will be installed automatic.
 
 ## Node.toml
 
-`cargo-node` provides an optional configuration file which you can put next to `cargo`'s [`Cargo.toml`].
+`cargo node` provides an optional configuration file which you can put next to `cargo`'s [`Cargo.toml`].
 
 Example:
 
 ```toml
-[[windows]]
+[[apps]]
 # Name of the executable
 name = "my app"
 # Defines the window width of the electron window
 width = 300
-# Defines the height of the electorn window
+# Defines the height of the electron window
 height = 100
+# Path of the assets folder with images, fonts, ...
+assets = "assets/"
 ```
 
 ## Tools under the hood 

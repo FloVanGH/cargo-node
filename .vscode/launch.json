@@ -7,6 +7,22 @@
     {
       "type": "lldb",
       "request": "launch",
+      "name": "deploy canvas-bin demo browser",
+      "program":"${workspaceFolder}/target/debug/cargo-node",
+      "cwd": "${workspaceFolder}/demo/canvas-bin",
+      "args": [
+        "deploy",
+        "--target",
+        "browser",
+      ],
+      "preLaunchTask": "build",
+      "sourceLanguages": [
+        "rust"
+      ]
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
       "name": "build canvas-bin demo browser",
       "program": "${workspaceFolder}/target/debug/cargo-node",
       "cwd": "${workspaceFolder}/demo/canvas-bin",
