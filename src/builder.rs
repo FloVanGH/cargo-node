@@ -1,4 +1,4 @@
-use std::{fs, io::prelude::*};
+use std::{fs, io::prelude::*, path::Path};
 
 use sigma::*;
 
@@ -10,7 +10,8 @@ use crate::{
 /// Builds the project with the given settings.
 pub struct Builder;
 
-pub fn save_template(template: String, path: String) {
+pub fn save_template(template: String, path: impl Into<String>) {
+    let path = path.into();
     println!("\t{}", path);
     let mut file =
         fs::File::create(path.clone()).expect(format!("Could not create {} file.", path).as_str());
@@ -76,6 +77,46 @@ impl Builder {
         );
 
         if config.target == Target::Browser {
+            // todo: remove redundant code
+            let mut style = String::new();
+            if let Some(node_toml) = node_toml {
+                if let Some(fonts) = node_toml.fonts(app_name.as_str()) {
+                    let mut work_around = String::new();
+                    style.push_str("<style>");
+
+                    for font in fonts {
+                        let path = Path::new(font.src.as_str());
+                        let font_file =
+                            format!("fonts/{}", path.file_name().unwrap().to_str().unwrap());
+
+                        style.push_str(
+                            format!(
+                                "@font-face {{ font-family: '{}'; src: url('{}'); }} ",
+                                font.font_family, font_file
+                            )
+                            .as_str(),
+                        );
+
+                        work_around.push_str(
+                            format!("\n<link rel='preload' as='font' href='{}'>", font_file)
+                                .as_str(),
+                        )
+                    }
+                    style.push_str("</style>");
+                    style.push_str(work_around.as_str());
+                }
+            }
+
+            let index_html = Sigma::new(DEFAULT_INDEX_HTML_TEMPLATE)
+                .bind("name", app_name.as_str())
+                .bind("style", style.as_str())
+                .parse()
+                .expect("Could not parse index.html template.")
+                .compile()
+                .expect("Could not compile index.hml template.");
+
+            save_template(index_html, "static/index.html");
+
             if let Some(node_toml) = node_toml {
                 asset_builder.build(app_name.as_str(), "static", &node_toml);
             }
@@ -116,8 +157,39 @@ impl Builder {
         println!("\ncreate templates");
         match config.target {
             Target::Electron => {
+                let mut style = String::new();
+                if let Some(node_toml) = node_toml {
+                    if let Some(fonts) = node_toml.fonts(app_name.as_str()) {
+                        let mut work_around = String::new();
+                        style.push_str("<style>");
+
+                        for font in fonts {
+                            let path = Path::new(font.src.as_str());
+                            let font_file =
+                                format!("fonts/{}", path.file_name().unwrap().to_str().unwrap());
+
+                            style.push_str(
+                                format!(
+                                    "@font-face {{ font-family: '{}'; src: url('{}'); }} ",
+                                    font.font_family, font_file
+                                )
+                                .as_str(),
+                            );
+
+                            work_around.push_str(
+                                format!("\n<link rel='preload' as='font' href='{}'>", font_file)
+                                    .as_str(),
+                            )
+                        }
+
+                        style.push_str("</style>");
+                        style.push_str(work_around.as_str());
+                    }
+                }
+
                 let index_html = Sigma::new(DEFAULT_INDEX_HTML_TEMPLATE)
                     .bind("name", app_name.as_str())
+                    .bind("style", style.as_str())
                     .parse()
                     .expect("Could not parse index.html template.")
                     .compile()
@@ -201,8 +273,39 @@ impl Builder {
                     format!("{}/www/compile_wasm.js", cordova_output_dir),
                 );
 
+                let mut style = String::new();
+                if let Some(node_toml) = node_toml {
+                    if let Some(fonts) = node_toml.fonts(app_name.as_str()) {
+                        let mut work_around = String::new();
+                        style.push_str("<style>");
+
+                        for font in fonts {
+                            let path = Path::new(font.src.as_str());
+                            let font_file =
+                                format!("fonts/{}", path.file_name().unwrap().to_str().unwrap());
+
+                            style.push_str(
+                                format!(
+                                    "@font-face {{ font-family: '{}'; src: url('{}'); }} ",
+                                    font.font_family, font_file
+                                )
+                                .as_str(),
+                            );
+
+                            work_around.push_str(
+                                format!("\n<link rel='preload' as='font' href='{}'>", font_file)
+                                    .as_str(),
+                            )
+                        }
+
+                        style.push_str("</style>");
+                        style.push_str(work_around.as_str());
+                    }
+                }
+
                 let index_html = Sigma::new(BROWSER_INDEX_HTML_TEMPLATE)
                     .bind("name", app_name.as_str())
+                    .bind("style", style.as_str())
                     .parse()
                     .expect("Could not parse index.html template.")
                     .compile()

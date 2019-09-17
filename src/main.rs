@@ -2,6 +2,7 @@ use std::{
     env,
     fs::{self, File},
     io::prelude::*,
+    path::Path,
 };
 
 use toml;
@@ -36,9 +37,14 @@ fn main() {
 
     // Clears the output.
     if config.task == Task::Clear {
-        fs::remove_dir_all("target/cargo-node/").unwrap();
-        fs::remove_dir_all("target/electron/").unwrap();
-        fs::remove_dir_all("target/cordova/").unwrap();
+        if Path::new("target/electron/").is_dir() {
+            fs::remove_dir_all("target/electron/").unwrap();
+        }
+
+        if Path::new("target/cordova/").is_dir() {
+            fs::remove_dir_all("target/cordova/").unwrap();
+        }
+
         return;
     }
 

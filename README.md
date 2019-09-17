@@ -74,6 +74,10 @@ width = 300
 height = 100
 # Path of the assets folder with images, fonts, ...
 assets = "assets/"
+# Add custom fonts to your project
+ [[apps.fonts]]
+    font_family = "My Font"
+    src = "fonts/MyFont.ttf"
 ```
 
 ## Tools under the hood 
