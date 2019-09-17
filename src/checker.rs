@@ -94,7 +94,12 @@ impl Checker {
                 if let Ok(dir) = fs::read_dir(p) {
                     for entry in dir {
                         if let Ok(entry) = entry {
-                            if entry.file_name().into_string().unwrap().starts_with(program) {
+                            if entry
+                                .file_name()
+                                .into_string()
+                                .unwrap()
+                                .starts_with(program)
+                            {
                                 return true;
                             }
                         }

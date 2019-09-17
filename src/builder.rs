@@ -2,7 +2,10 @@ use std::{fs, io::prelude::*};
 
 use sigma::*;
 
-use crate::{cargo_toml::*, command::Command, config::*, node_toml::*, templates::*};
+use crate::{
+    asset_builder::AssetBuilder, cargo_toml::*, command::Command, config::*, node_toml::*,
+    templates::*,
+};
 
 /// Builds the project with the given settings.
 pub struct Builder;
@@ -27,6 +30,7 @@ impl Builder {
         config: &Config,
         cargo_toml: &CargoToml,
         node_toml: &Option<NodeToml>,
+        asset_builder: &AssetBuilder,
     ) -> String {
         // build with cargo web
         let mut cargo_web_command = Command::new("cargo-web").arg("build");
@@ -73,23 +77,7 @@ impl Builder {
 
         if config.target == Target::Browser {
             if let Some(node_toml) = node_toml {
-                if let Some(assets) = node_toml.assets(app_name.as_str()) {
-                    println!("Copy assets for cargo-web.");
-                    let asset_dir = format!("static/{}", assets);
-
-                    fs::create_dir_all(asset_dir.clone()).unwrap();
-
-                    for entry in fs::read_dir(assets).unwrap() {
-                        let file_name = entry.unwrap().file_name().into_string().unwrap();
-                        println!("{}/{}", assets, file_name);
-                        println!("{}/{}", asset_dir, file_name);
-                        fs::copy(
-                            format!("{}/{}", assets, file_name),
-                            format!("{}/{}", asset_dir, file_name),
-                        )
-                        .unwrap();
-                    }
-                }
+                asset_builder.build(app_name.as_str(), "static", &node_toml);
             }
 
             return cargo_web_output_dir;
@@ -246,23 +234,13 @@ impl Builder {
                     format!("{}/www/{}.js", cordova_output_dir, app_name),
                 );
 
-                // todo: fix redundant code (asset loading)
+                // todo: fix redundant code (asset / font loading)
                 if let Some(node_toml) = node_toml {
-                    if let Some(assets) = node_toml.assets(app_name.as_str()) {
-                        println!("Copy assets for cargo-web.");
-                        let asset_dir = format!("{}/www/{}", cordova_output_dir, assets);
-
-                        fs::create_dir_all(asset_dir.clone()).unwrap();
-
-                        for entry in fs::read_dir(assets).unwrap() {
-                            let file_name = entry.unwrap().file_name().into_string().unwrap();
-                            fs::copy(
-                                format!("{}/{}", assets, file_name),
-                                format!("{}/{}", asset_dir, file_name),
-                            )
-                            .unwrap();
-                        }
-                    }
+                    asset_builder.build(
+                        app_name.as_str(),
+                        format!("{}/www", cordova_output_dir).as_str(),
+                        &node_toml,
+                    );
                 }
 
                 println!("\ncordova platform add android");
@@ -304,24 +282,12 @@ impl Builder {
                 .expect("Could not run npm install.");
         }
 
-        println!("Copy assets.");
-
         if let Some(node_toml) = node_toml {
-            if let Some(assets) = node_toml.assets(app_name.as_str()) {
-                println!("Copy assets for cargo-web.");
-                let asset_dir = format!("{}/{}", cargo_node_output_dir, assets);
-
-                fs::create_dir_all(asset_dir.clone()).unwrap();
-
-                for entry in fs::read_dir(assets).unwrap() {
-                    let file_name = entry.unwrap().file_name().into_string().unwrap();
-                    fs::copy(
-                        format!("{}/{}", assets, file_name),
-                        format!("{}/{}", asset_dir, file_name),
-                    )
-                    .unwrap();
-                }
-            }
+            asset_builder.build(
+                app_name.as_str(),
+                format!("{}", cargo_node_output_dir).as_str(),
+                &node_toml,
+            );
         }
 
         println!("\nfinished build.");

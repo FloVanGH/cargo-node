@@ -6,6 +6,7 @@ use std::{
 
 use toml;
 
+use self::asset_builder::*;
 use self::builder::*;
 use self::cargo_toml::*;
 use self::checker::*;
@@ -14,6 +15,7 @@ use self::deployer::*;
 use self::node_toml::*;
 use self::runner::*;
 
+mod asset_builder;
 mod builder;
 mod cargo_toml;
 mod checker;
@@ -26,7 +28,9 @@ mod templates;
 
 fn main() {
     // Build config file
-    let mut args: Vec<String> = env::args().filter(|a| a != "node" && a!= "cargo").collect();
+    let mut args: Vec<String> = env::args()
+        .filter(|a| a != "node" && a != "cargo")
+        .collect();
     args.remove(0);
     let config = Config::from(args.clone());
 
@@ -59,15 +63,24 @@ fn main() {
         node_toml = Some(toml::from_str(contents.as_str()).unwrap());
     }
 
+    // asset builder
+    let asset_builder = AssetBuilder::new();
+
     // run builder
-    let output_dir = Builder::new().run(&config, &cargo_toml, &node_toml);
+    let output_dir = Builder::new().run(&config, &cargo_toml, &node_toml, &asset_builder);
 
     match config.task {
         Task::Run => {
             Runner::new().run(&config, output_dir.as_str());
         }
         Task::Deploy => {
-            Deployer::new().run(&config, &cargo_toml, output_dir.as_str());
+            Deployer::new().run(
+                &config,
+                &cargo_toml,
+                output_dir.as_str(),
+                &node_toml,
+                &asset_builder,
+            );
         }
         _ => {}
     }

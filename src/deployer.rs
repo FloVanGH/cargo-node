@@ -2,7 +2,10 @@ use std::{fs, io::prelude::*};
 
 use sigma::Sigma;
 
-use crate::{builder::save_template, cargo_toml::*, command::Command, config::*, templates::*};
+use crate::{
+    asset_builder::AssetBuilder, builder::save_template, cargo_toml::*, command::Command,
+    config::*, node_toml::NodeToml, templates::*,
+};
 
 /// Deploys the project with the given settings.
 pub struct Deployer;
@@ -14,7 +17,14 @@ impl Deployer {
     }
 
     /// Runs the build process. Returns the output director.
-    pub fn run(&self, config: &Config, cargo_toml: &CargoToml, output_dir: &str) {
+    pub fn run(
+        &self,
+        config: &Config,
+        cargo_toml: &CargoToml,
+        output_dir: &str,
+        node_toml: &Option<NodeToml>,
+        asset_builder: &AssetBuilder,
+    ) {
         // let mut path_extension = "";
         let mut app_name = if let Some(package) = &cargo_toml.package {
             if let Some(name) = &package.name {
@@ -73,7 +83,8 @@ impl Deployer {
                 file.read_to_string(&mut contents).unwrap();
 
                 let std_web_start = contents.find("var Module = {};").unwrap();
-                let std_web_end = contents.find("return Module.exports;").unwrap() + "return Module.exports;".len();
+                let std_web_end = contents.find("return Module.exports;").unwrap()
+                    + "return Module.exports;".len();
 
                 let std_web_part = contents.get(std_web_start..std_web_end);
 
@@ -86,6 +97,10 @@ impl Deployer {
                     .expect("Could not compile app js template.");
 
                 save_template(app_js, format!("{}/{}.js", deploy_path, app_name));
+
+                if let Some(node_toml) = node_toml {
+                    asset_builder.build(app_name.as_str(), deploy_path.as_str(), &node_toml);
+                }
             }
             Target::Android => {
                 println!("\ndeploy android target");

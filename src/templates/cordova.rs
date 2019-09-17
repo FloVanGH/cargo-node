@@ -61,7 +61,7 @@ pub const CORDOVA_COMPILE_WASM_JS_TEMPLATE: &'static str = r#"onmessage = functi
     })
 }"#;
 
-pub const CORDOVA_ANDROID_JS : &'static str = r#""use strict";
+pub const CORDOVA_ANDROID_JS: &'static str = r#""use strict";
 
 if (typeof Rust === "undefined") {
     var Rust = {};
