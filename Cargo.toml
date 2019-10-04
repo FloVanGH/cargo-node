@@ -2,6 +2,10 @@
 name = "cargo-node"
 version = "0.1.0"
 authors = ["Florian Blasius <flovanpt@posteo.de>"]
+description = "A cargo sub command to build, run and deploy rust wasm applications as browser, electron or cordova app."
+repository = "https://github.com/FloVanGH/cargo-node"
+readme = "README.md"
+license = "MIT"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

@@ -55,7 +55,7 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "build canvas-bin demo electorn",
+      "name": "build canvas-bin demo electron",
       "program": "${workspaceFolder}/target/debug/cargo-node",
       "cwd": "${workspaceFolder}/demo/canvas-bin",
       "args": [
