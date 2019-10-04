@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde_derive::Deserialize;
 
 /// Package definition inside of a Cargo.toml file.
 #[derive(Debug, Deserialize)]

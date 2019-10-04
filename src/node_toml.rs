@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde_derive::Deserialize;
 
 #[derive(Default, Debug, Deserialize)]
 pub struct Font {

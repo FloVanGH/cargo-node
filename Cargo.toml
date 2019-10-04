@@ -11,4 +11,5 @@ edition = "2018"
 [dependencies]
 sigma = "0.1.1"
 toml = "0.5.3"
-serde = { verison = "1.0.101", features = ["derive"] }
+serde = "1.0.101"
+serde_derive = "1.0.101"

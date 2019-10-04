@@ -61,10 +61,10 @@ impl Builder {
             _ => {}
         }
 
-        if config.mode == Mode::Release || config.task == Task::Deploy {
-            cargo_web_command = cargo_web_command.arg("--release");
-            mode_path = "release";
-        }
+        // if config.mode == Mode::Release || config.task == Task::Deploy {
+        //     cargo_web_command = cargo_web_command.arg("--release");
+        //     mode_path = "release";
+        // }
 
         println!("Run cargo-web.");
         cargo_web_command
@@ -115,7 +115,10 @@ impl Builder {
                 .compile()
                 .expect("Could not compile index.hml template.");
 
-            save_template(index_html, "static/index.html");
+            if config.task != Task::Deploy {
+                fs::create_dir_all("static").unwrap();
+                save_template(index_html, "static/index.html");
+            }
 
             if let Some(node_toml) = node_toml {
                 asset_builder.build(app_name.as_str(), "static", &node_toml);
