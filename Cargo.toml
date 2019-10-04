@@ -8,9 +8,7 @@ readme = "README.md"
 license = "MIT"
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 sigma = "0.1.1"
 toml = "0.5.3"
-serde = { verison = "1.0.99", features = ["derive"] }
+serde = { verison = "1.0.101", features = ["derive"] }
