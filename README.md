@@ -51,7 +51,7 @@ cargo node run --example my_example
 ## Installation
 
 ```sh
-cargo install cargo node
+cargo install cargo-node
 ```
 
 Before you could use cargo node you have to install `npm` version 6.9.0. It is included in the `Node.js` version 10.16.3. You could download it from https://nodejs.org/dist/v10.16.3/. 
