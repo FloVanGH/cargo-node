@@ -1,4 +1,4 @@
-pub const MAIN_JS_TEMPLATE: &'static str = r#"const {app, BrowserWindow} = require('electron')
+pub const MAIN_JS_TEMPLATE: &str = r#"const {app, BrowserWindow} = require('electron')
 const path = require('path')
 
 let mainWindow
@@ -29,7 +29,7 @@ app.on('activate', function () {
   if (mainWindow === null) createWindow()
 })"#;
 
-pub const PACKAGE_JSON_TEMPLATE: &'static str = r#"{
+pub const PACKAGE_JSON_TEMPLATE: &str = r#"{
   "name": "{{ name: str }}",
   "version": "1.0.0",
   "description": "Build by cargo-node.",
@@ -47,7 +47,7 @@ pub const PACKAGE_JSON_TEMPLATE: &'static str = r#"{
   }
 }"#;
 
-pub const PRELOAD_JS_TEMPLATE: &'static str =
+pub const PRELOAD_JS_TEMPLATE: &str =
     r#"window.addEventListener('DOMContentLoaded', () => {
   const replaceText = (selector, text) => {
     const element = document.getElementById(selector)

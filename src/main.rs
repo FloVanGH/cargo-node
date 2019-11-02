@@ -33,7 +33,7 @@ fn main() {
         .filter(|a| a != "node" && a != "cargo")
         .collect();
     args.remove(0);
-    let config = Config::from(args.clone());
+    let config = Config::from(args);
 
     // Clears the output.
     if config.task == Task::Clear {

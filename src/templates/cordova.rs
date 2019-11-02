@@ -1,4 +1,4 @@
-pub const CORDOVA_PACKAGE_JSON_TEMPLATE: &'static str = r#"{
+pub const CORDOVA_PACKAGE_JSON_TEMPLATE: &str = r#"{
   "name": "{{ name: str }}",
   "displayName": "{{ name: str }}",
   "version": "1.0.0",
@@ -28,7 +28,7 @@ pub const CORDOVA_PACKAGE_JSON_TEMPLATE: &'static str = r#"{
   }
 }"#;
 
-pub const CORDOVA_CONFIG_XML_TEMPLATE: &'static str = r#"<?xml version='1.0' encoding='utf-8'?>
+pub const CORDOVA_CONFIG_XML_TEMPLATE: &str = r#"<?xml version='1.0' encoding='utf-8'?>
 <widget id="io.cordova.hellocordova" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>{{ name: str }}</name>
     <description>
@@ -53,7 +53,7 @@ pub const CORDOVA_CONFIG_XML_TEMPLATE: &'static str = r#"<?xml version='1.0' enc
     </platform>
 </widget>"#;
 
-pub const CORDOVA_COMPILE_WASM_JS_TEMPLATE: &'static str = r#"onmessage = function (e) {
+pub const CORDOVA_COMPILE_WASM_JS_TEMPLATE: &str = r#"onmessage = function (e) {
     WebAssembly.compile(e.data).then(function(mod) { 
         this.postMessage(mod);
     }).catch(function (error) {
@@ -61,7 +61,7 @@ pub const CORDOVA_COMPILE_WASM_JS_TEMPLATE: &'static str = r#"onmessage = functi
     })
 }"#;
 
-pub const CORDOVA_ANDROID_JS: &'static str = r#""use strict";
+pub const CORDOVA_ANDROID_JS: &str = r#""use strict";
 
 if (typeof Rust === "undefined") {
     var Rust = {};

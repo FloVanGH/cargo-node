@@ -1,4 +1,4 @@
-pub const DEFAULT_INDEX_HTML_TEMPLATE: &'static str = r#"<!DOCTYPE html>
+pub const DEFAULT_INDEX_HTML_TEMPLATE: &str = r#"<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -26,7 +26,7 @@ pub const DEFAULT_INDEX_HTML_TEMPLATE: &'static str = r#"<!DOCTYPE html>
 </body>
 </html>"#;
 
-pub const BROWSER_INDEX_HTML_TEMPLATE: &'static str = r#"<!DOCTYPE html>
+pub const BROWSER_INDEX_HTML_TEMPLATE: &str = r#"<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -56,7 +56,7 @@ pub const BROWSER_INDEX_HTML_TEMPLATE: &'static str = r#"<!DOCTYPE html>
 </body>
 </html>"#;
 
-pub const CARGO_WEB_BROWSER_JS: &'static str = r#""use strict";
+pub const CARGO_WEB_BROWSER_JS: &str = r#""use strict";
 
 if (typeof Rust === "undefined") {
     var Rust = {};

@@ -13,10 +13,10 @@ pub struct Builder;
 pub fn save_template(template: String, path: impl Into<String>) {
     let path = path.into();
     println!("\t{}", path);
-    let mut file =
-        fs::File::create(path.clone()).expect(format!("Could not create {} file.", path).as_str());
+    let mut file = fs::File::create(path.clone())
+        .unwrap_or_else(|_| panic!("Could not create {} file.", path));
     file.write_all(template.as_bytes())
-        .expect(format!("Could not write to {}", path).as_str());
+        .unwrap_or_else(|_| panic!("Could not write to {}", path));
 }
 
 impl Builder {
@@ -36,7 +36,7 @@ impl Builder {
         // build with cargo web
         let mut cargo_web_command = Command::new("cargo-web").arg("build");
         let mut path_extension = "";
-        let mut mode_path = "debug";
+        let mode_path = "debug";
         let mut app_name = if let Some(package) = &cargo_toml.package {
             if let Some(name) = &package.name {
                 name.clone()
@@ -131,29 +131,26 @@ impl Builder {
         let cargo_node_output_dir = format!("target/electron{}", path_extension);
         fs::create_dir_all(cargo_node_output_dir.clone()).unwrap();
 
-        match config.target {
-            Target::Electron => {
-                println!("\ncopy files to electron/");
-                println!("\t{}", format!("{}.d", app_name));
-                fs::copy(
-                    format!("{}/{}.d", cargo_web_output_dir, app_name),
-                    format!("{}/{}.d", cargo_node_output_dir, app_name),
-                )
-                .unwrap();
-                println!("\t{}", format!("{}.js", app_name));
-                fs::copy(
-                    format!("{}/{}.js", cargo_web_output_dir, app_name),
-                    format!("{}/{}.js", cargo_node_output_dir, app_name),
-                )
-                .unwrap();
-                println!("\t{}", format!("{}.wasm", app_name));
-                fs::copy(
-                    format!("{}/{}.wasm", cargo_web_output_dir, app_name),
-                    format!("{}/{}.wasm", cargo_node_output_dir, app_name),
-                )
-                .unwrap();
-            }
-            _ => {}
+        if let Target::Electron = config.target {
+            println!("\ncopy files to electron/");
+            println!("\t{}", format!("{}.d", app_name));
+            fs::copy(
+                format!("{}/{}.d", cargo_web_output_dir, app_name),
+                format!("{}/{}.d", cargo_node_output_dir, app_name),
+            )
+            .unwrap();
+            println!("\t{}", format!("{}.js", app_name));
+            fs::copy(
+                format!("{}/{}.js", cargo_web_output_dir, app_name),
+                format!("{}/{}.js", cargo_node_output_dir, app_name),
+            )
+            .unwrap();
+            println!("\t{}", format!("{}.wasm", app_name));
+            fs::copy(
+                format!("{}/{}.wasm", cargo_web_output_dir, app_name),
+                format!("{}/{}.wasm", cargo_node_output_dir, app_name),
+            )
+            .unwrap();
         }
 
         // build templates
@@ -391,7 +388,7 @@ impl Builder {
         if let Some(node_toml) = node_toml {
             asset_builder.build(
                 app_name.as_str(),
-                format!("{}", cargo_node_output_dir).as_str(),
+                cargo_node_output_dir.to_string().as_str(),
                 &node_toml,
             );
         }
@@ -402,24 +399,20 @@ impl Builder {
     }
 
     fn get_window_size(&self, node_toml: &Option<NodeToml>, app_name: &str) -> (String, String) {
-        return if let Some(node_toml) = node_toml {
+        if let Some(node_toml) = node_toml {
             if let Some(windows) = &node_toml.apps {
                 if windows.len() == 1 {
-                    (windows[0].width.to_string(), windows[0].height.to_string())
+                    return (windows[0].width.to_string(), windows[0].height.to_string());
                 } else {
-                    let window = windows.iter().filter(|w| w.name == app_name).next();
+                    let window = windows.iter().find(|w| w.name == app_name);
 
                     if let Some(window) = window {
-                        (window.width.to_string(), window.height.to_string())
-                    } else {
-                        ("100".to_string(), "100".to_string())
+                        return (window.width.to_string(), window.height.to_string());
                     }
                 }
-            } else {
-                ("100".to_string(), "100".to_string())
             }
-        } else {
-            ("100".to_string(), "100".to_string())
-        };
+        }
+
+        ("100".to_string(), "100".to_string())
     }
 }

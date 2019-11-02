@@ -209,7 +209,7 @@ impl From<Vec<String>> for Config {
         Config {
             task: task.unwrap(),
             mode,
-            target: target,
+            target,
             package: package.unwrap(),
         }
     }
