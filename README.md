@@ -1,3 +1,5 @@
+# moved to https://github.com/morphUI/cargo_node
+
 # cargo-node
 
 [![Build and test](https://github.com/FloVanGH/cargo-node/workflows/Build%20and%20test/badge.svg)](https://github.com/FloVanGH/cargo-node/actions)
